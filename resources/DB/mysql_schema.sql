@@ -16,18 +16,17 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `article_facebook_shares`
+-- Table structure for table `article_social_media_shares`
 --
 
-#Create following db before running this dump
-#create Database micromort;
-
-DROP TABLE IF EXISTS `article_facebook_shares`;
+DROP TABLE IF EXISTS `article_social_media_shares`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `article_facebook_shares` (
+CREATE TABLE `article_social_media_shares` (
   `id` int(32) NOT NULL AUTO_INCREMENT,
   `url_id` int(32) DEFAULT NULL,
+  `social_media_channel` varchar(20) DEFAULT NULL,
+  `counts` int(32) DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -37,12 +36,12 @@ CREATE TABLE `article_facebook_shares` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `article_facebook_shares`
+-- Dumping data for table `article_social_media_shares`
 --
 
-LOCK TABLES `article_facebook_shares` WRITE;
-/*!40000 ALTER TABLE `article_facebook_shares` DISABLE KEYS */;
-/*!40000 ALTER TABLE `article_facebook_shares` ENABLE KEYS */;
+LOCK TABLES `article_social_media_shares` WRITE;
+/*!40000 ALTER TABLE `article_social_media_shares` DISABLE KEYS */;
+/*!40000 ALTER TABLE `article_social_media_shares` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -58,7 +57,7 @@ CREATE TABLE `article_urls` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_url` (`url`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -67,6 +66,7 @@ CREATE TABLE `article_urls` (
 
 LOCK TABLES `article_urls` WRITE;
 /*!40000 ALTER TABLE `article_urls` DISABLE KEYS */;
+INSERT INTO `article_urls` VALUES (1,'http','2017-09-13 19:00:46');
 /*!40000 ALTER TABLE `article_urls` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -79,4 +79,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-09-12 17:53:56
+-- Dump completed on 2017-09-13 19:07:36
