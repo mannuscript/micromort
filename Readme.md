@@ -1,17 +1,18 @@
 # Micromort
 Project Micromort (Micro + Mortality) started at --- lab, NUS is the first attempt to detect the Risk from Social Media data. Think of it as doing next version of sentiment analysis in which we are trying to detect the risk pulse.
-This repo is the scriptpack for the project containing most of the engineering work we are doing (which can be public also).
+This repo is the scriptpack for the project, containing most of the engineering work we are doing (which can be public also).
 
 #### Scripts:
-1. Share Metric: Get the number of (FB) shares for news articles posted on popular new websites.
+1. Share Metric: Get the number of (FB) shares for news articles posted on popular news websites.
     1. [./share_metrics/newsfeedcrawler.py](./share_metrics/newsfeedcrawler.py) : Get the URLs of the news article from the predefined list of RSS feeders and store them in Mongo.
-    2. [./share_metrics/parsers/main.py](./share_metrics/parsers/main.py) : After few days (15/30 ?) get those URLS from mongo and crawl the webpages to get the the number of shares. Finally storing them into mysql ([micromort](./resources/DB/mysql_schema.sql))
+    2. [./share_metrics/parsers/main.py](./share_metrics/parsers/main.py) : After few days (15/30 ?) get those URLS from mongo and crawl the webpages to get the the number of shares. Finally storing them into mysql ([micromort db](./resources/DB/mysql_schema.sql))
 
 
 ### Prerequisites
 
  1. Mysql
-Make sure you have mysql creds stored at ~/.my.cfg 
+    1. Make sure you have mysql creds stored in ~/.my.cfg. 
+ 
  Sample file:
 ```
 [client]
@@ -24,8 +25,8 @@ password=password
 
 
 
-## Setup
- 1. You need a database `Micromort` in mysql.
+### Setup
+ 1. You need a database `micromort` in mysql.
 For creating the schema:
 ```
 mysql -uroot -p micromort < /resources/DB/mysql_schema.sql
