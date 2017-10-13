@@ -8,8 +8,13 @@ import time
 import json
 import feedparser
 import os
-from parsers.main import Parser
 from pymongo import MongoClient
+import sys
+
+sys.path.insert(0, '../resources/configs')
+#Import project files
+from mongodbconfig import mongodb_config
+
 
 class NewsFeedCrawler:
 
@@ -19,9 +24,11 @@ class NewsFeedCrawler:
         self._init_feed_urls(feed_urls_file_name)
     
     def _createMongoDbAndCollection(self):        
-        self.mongo_client = MongoClient('localhost', 27017)
-        self.mongo_db_singhose = self.mongo_client['rss'] # set to your db name
-        self.mongo_collection_articles = self.mongo_db_singhose['articles'] # set to you collection name
+        self.mongo_client = MongoClient( mongodb_config['host'], mongodb_config['port'])
+        # set to your db name
+        self.mongo_db_singhose = self.mongo_client[mongodb_config['db']] 
+        # set to you collection name
+        self.mongo_collection_articles = self.mongo_db_singhose[mongodb_config['collection']] 
         #Create a unique index on link, as rss feed will be fetching the same 
         # url again and again.
         self.mongo_collection_articles.create_index("link", unique=True)
@@ -61,7 +68,6 @@ class NewsFeedCrawler:
                         "link" : entry_json["link"]
                     }, 
                     entry_json, True)
-                print Parser.main(entry_json["link"])
             except Exception as ex:
                 #logging.exception("Something awful happened!")
                 print "ERROR----------------"
