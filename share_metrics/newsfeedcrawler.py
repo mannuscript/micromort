@@ -69,7 +69,7 @@ class NewsFeedCrawler:
                     entry_json, True)
             except Exception as ex:
                 #logging.exception("Something awful happened!")
-                print "ERROR----------------"
+                logging.error("ERROR----------------")
                 import traceback
                 traceback.print_exc()
                 pass # ignore if insert fails (duplicate)
