@@ -8,7 +8,7 @@ import time
 import json
 import feedparser
 import os
-from parsers.main import main
+from parsers.main import Parser
 from pymongo import MongoClient
 
 class NewsFeedCrawler:
@@ -61,7 +61,7 @@ class NewsFeedCrawler:
                         "link" : entry_json["link"]
                     }, 
                     entry_json, True)
-                print main(entry_json["link"])
+                print Parser.main(entry_json["link"])
             except Exception as ex:
                 #logging.exception("Something awful happened!")
                 print "ERROR----------------"

@@ -15,8 +15,9 @@ from bson.objectid import ObjectId
 import sys
 
 #Add configs dir into system path to be able to include the configs
-sys.path.insert(0, '../../resources/configs')
-
+##You shld run it from one upper directory.
+sys.path.insert(0, '../resources/configs')
+print(sys.path)
 #Import project files
 from straitstimes import get_straitstimes_a2a_counts
 from mysqlconfig import mysql_config
