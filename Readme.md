@@ -5,7 +5,7 @@ This repo is the scriptpack for the project, containing most of the engineering 
 #### Scripts:
 1. Share Metric: Get the number of (FB) shares for news articles posted on popular news websites.
     1. [./share_metrics/newsfeedcrawler.py](./share_metrics/newsfeedcrawler.py) : Get the URLs of the news article from the predefined list of RSS feeders and store them in Mongo.
-    2. [./share_metrics/parsers/main.py](./share_metrics/parsers/main.py) : After few days (15/30 ?) get those URLS from mongo and crawl the webpages to get the the number of shares. Finally storing them into mysql ([micromort db](./resources/DB/mysql_schema.sql))
+    2. [./share_metrics/parsers/main.py](./share_metrics/parsers/main.py) : After few days (15/30 ?) get those URLS from mongo and crawl the webpages to get the the number of shares. Finally storing the data into mysql ([micromort db](./resources/DB/mysql_schema.sql))
 
 
 ### Prerequisites
@@ -51,7 +51,6 @@ mysql -uroot -p micromort < /resources/DB/mysql_schema.sql
  1. Write parser for: asiaone, businesstimes, todayonline, channelnewsasia
  2. Setup the crons
  3. Create requirements.py for share_metric
- 4. Look into the issue of why phantomjs process is not getting killed.
 
 
 ## License

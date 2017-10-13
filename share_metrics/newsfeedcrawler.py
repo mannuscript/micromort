@@ -15,7 +15,6 @@ sys.path.insert(0, '../resources/configs')
 #Import project files
 from mongodbconfig import mongodb_config
 
-
 class NewsFeedCrawler:
 
     def __init__(self, feed_urls_file_name):

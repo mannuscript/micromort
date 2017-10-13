@@ -17,11 +17,10 @@ import sys
 #Add configs dir into system path to be able to include the configs
 ##You shld run it from one upper directory.
 sys.path.insert(0, '../resources/configs')
-print(sys.path)
 #Import project files
 from straitstimes import get_straitstimes_a2a_counts
 from mysqlconfig import mysql_config
-
+from mongodbconfig import mongodb_config
 
 class Parser:
 
@@ -40,9 +39,9 @@ class Parser:
         self.cursor = self.db.cursor()
 
     def __getMongoClient(self):
-        mongo_client = MongoClient('localhost', 27017)
-        mongo_db_singhose = mongo_client['rss'] # set to your db name
-        mongo_collection_articles = mongo_db_singhose['articles'] # set to you collection name
+        mongo_client = MongoClient( mongodb_config['host'], mongodb_config['port'])
+        mongo_db_singhose = mongo_client[mongodb_config['db']] # set to your db name
+        mongo_collection_articles = mongo_db_singhose[mongodb_config['collection']] # set to you collection name
         return mongo_collection_articles
     
     #
@@ -91,7 +90,8 @@ class Parser:
             count = self.__get_shares(url)
             self.dumpIntoMysql(url, count, "Facebook")
             #print url, count
-
+        #have to call the the close function to kill phantomjs process
+        self.driver.quit()
         return urls
 
 
