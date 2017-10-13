@@ -46,26 +46,39 @@ For creating the schema:
 ```
 mysql -uroot -p micromort < /resources/DB/mysql_schema.sql
 ```
+ 3. 
 
 
 ### Running the scripts
 1. Share Metric: (Make sure mongo is running)
     1. Get the urls: 
     ```
-    cd share_metrics
     python newsfeedcrawler.py
     ``` 
 
     2. Get the number of shares
     ```
-    cd share_metrics/parsers
     python main.py
     ```
+
+### Contributing
+Please consider following practices while contributing to the repo
+#### 1. Logger:
+Logger has been defined in the [./utils/logger.py](./utils/logger.py) please DO NOT
+use any other logger or print. usage:
+```
+sys.path.append("./utils/")
+from logger import logger
+logger.INFO("Hello world!")
+```
+To change the logging level, change value of level in file: [./resources/configs/loggerconfig.py](./resources/configs/loggerconfig.py)
+#### 2. Data stores
+Connection to data stores like mysql and mongo have been defined in 
+[./data_stores](./data_stores) dir.
 
 ## TODO:
  1. Write parser for: asiaone, businesstimes, todayonline, channelnewsasia
  2. Setup the crons
- 3. Create requirements.py for share_metric
 
 
 ## License
