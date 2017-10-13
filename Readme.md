@@ -26,7 +26,22 @@ password=password
 
 
 ### Setup
- 1. You need a database `micromort` in mysql.
+ 1. Setting up the python virtual env and installing the requirements.
+Create the virtual env [one time process], virtualenv is in gitignore hence you 
+have to create one on your local machine
+```
+virtualenv --no-site-packages virtualenv
+```
+Activate it:
+```
+source virtualenv/bin/activate
+```
+Install the requirements:
+```
+pip install -r requirements.txt
+```
+
+ 2. You need a database `micromort` in mysql.
 For creating the schema:
 ```
 mysql -uroot -p micromort < /resources/DB/mysql_schema.sql
