@@ -27,7 +27,8 @@ password=password
 
 ### Setup
  1. Setting up the python virtual env and installing the requirements.
-Create the virtual env [one time process], virtualenv is in gitignore hence you 
+
+Create the virtual env (one time process), virtualenv is in gitignore hence you 
 have to create one on your local machine
 ```
 virtualenv --no-site-packages virtualenv
@@ -45,40 +46,49 @@ pip install -r requirements.txt
 For creating the schema:
 ```
 mysql -uroot -p micromort < /resources/DB/mysql_schema.sql
-```
- 3. 
+``` 
 
 
 ### Running the scripts
+NOTE: since all paths are defined in the in respect to root directory (e.g. sys.path.append) the scripts can only be triggered from root directory.
 1. Share Metric: (Make sure mongo is running)
     1. Get the urls: 
     ```
-    python newsfeedcrawler.py
+    python ./share_metrics/newsfeedcrawler.py
     ``` 
 
     2. Get the number of shares
     ```
-    python main.py
+    python ./share_metrics/parsers/main.py
     ```
 
 ### Contributing
 Please consider following practices while contributing to the repo
 #### 1. Logger:
 Logger has been defined in the [./utils/logger.py](./utils/logger.py) please DO NOT
-use any other logger or print. usage:
+use any other logger or print. 
 ```
+# Usage:
 sys.path.append("./utils/")
 from logger import logger
-logger.INFO("Hello world!")
+logger.info("Hello world!")
 ```
 To change the logging level, change value of level in file: [./resources/configs/loggerconfig.py](./resources/configs/loggerconfig.py)
 #### 2. Data stores
 Connection to data stores like mysql and mongo have been defined in 
 [./data_stores](./data_stores) dir.
+```
+# usage:
+sys.path.append("./data_stores")
+from mysql import db, cursor
+from mongodb import mongo_collection_articles
+```
 
 ## TODO:
  1. Write parser for: asiaone, businesstimes, todayonline, channelnewsasia
  2. Setup the crons
+ 3. Check if there is any way remove the restriction of running the scripts only from home directory. i.e. if we can do the sys.path.append in a better way!
+ 4. 
 
 
 ## License

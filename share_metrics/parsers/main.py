@@ -15,8 +15,9 @@ import os
 
 #Import project files
 from straitstimes import get_straitstimes_a2a_counts
+from channelnewsasia import get_shares_counts as channelnewsasia_share_counts
 
-# Get dta stores
+# Get data stores
 sys.path.append("./data_stores")
 from mysql import db, cursor
 from mongodb import mongo_collection_articles
@@ -33,6 +34,7 @@ class Parser:
         self.mongoClient = mongo_collection_articles
         self.driver = webdriver.PhantomJS(service_args=['--ignore-ssl-errors=true'])
         self.driver.set_page_load_timeout(45)
+        
         self.db = db
         self.cursor = cursor
     
@@ -42,15 +44,26 @@ class Parser:
     #
     def __get_shares(self, article_url):
         try:
-            self.driver.get(article_url);
+            self.driver.get(article_url)
         except TimeoutException:
             self.driver.execute_script("window.stop();")
             print "Page load time out -- try again later"
             return None
-        return get_straitstimes_a2a_counts(article_url, self.driver.page_source, "Facebook")
+        
+        if "http://www.straitstimes.com" in url:
+            caller = get_straitstimes_a2a_counts
+        else if "http://www.channelnewsasia.com" in url:
+            caller = channelnewsasia_share_counts
+        else:
+            caller = self.default_caller
+
+        return caller(article_url, self.driver.page_source, "Facebook")
+
+    def default_caller(url, source, media):
+        logger.error("Parser not found :O for url: ", url)
 
     #Get urls from mongodb which were inserted d (default 15) days ago
-    def __getUrlsToCrawl(self, d=15):
+    def __getUrlsToCrawl(self, d=1):
         
         now = datetime.datetime.now()
         today = datetime.datetime(now.year, now.month, now.day)
@@ -75,11 +88,10 @@ class Parser:
              values(%s, %s, %s)""",[self.db.insert_id(), socialMediaChannel, count])
         
 
-
     def main(self):
         urls = self.__getUrlsToCrawl(0)
         
-        logger.info(" Main function called going to work on " \
+        logger.info(" Main function called, going to work on " \
                      + str(len(urls)) + " url(s)")
         logger.debug(" list of urls: " + str(urls))
 
@@ -95,5 +107,5 @@ class Parser:
 
 if __name__ == "__main__":
     parser = Parser()
-    parser.main();
-    #print get_shares("http://www.straitstimes.com/lifestyle/anger-over-influencers-sponsored-wedding", "straitstimes")
+    #parser.main();
+    print get_shares("http://www.straitstimes.com/lifestyle/anger-over-influencers-sponsored-wedding", "straitstimes")

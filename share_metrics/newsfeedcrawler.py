@@ -11,31 +11,24 @@ import os
 from pymongo import MongoClient
 import sys
 
-sys.path.insert(0, '../resources/configs')
-#Import project files
-from mongodbconfig import mongodb_config
+sys.path.insert(0, './resources/configs')
+sys.path.append("./data_stores")
+sys.path.append("./utils")
+from logger import logger
+from mysql import db, cursor
+from mongodb import mongo_collection_articles
 
 class NewsFeedCrawler:
 
     def __init__(self, feed_urls_file_name):
-        self._createMongoDbAndCollection()
+        self.mongo_collection_articles = mongo_collection_articles
         self.rss_feed_urls = []
         self._init_feed_urls(feed_urls_file_name)
-    
-    def _createMongoDbAndCollection(self):        
-        self.mongo_client = MongoClient( mongodb_config['host'], mongodb_config['port'])
-        # set to your db name
-        self.mongo_db_singhose = self.mongo_client[mongodb_config['db']] 
-        # set to you collection name
-        self.mongo_collection_articles = self.mongo_db_singhose[mongodb_config['collection']] 
-        #Create a unique index on link, as rss feed will be fetching the same 
-        # url again and again.
-        self.mongo_collection_articles.create_index("link", unique=True)
+        logger.info("Going to work on " + str(len(self.rss_feed_urls)) + " rss feeds")
             
     def start_crawling(self):
         self._fetch_feeds()
             
-        
     def _init_feed_urls(self, feed_urls_file_name):
         with open(feed_urls_file_name, 'r') as f:
             for line in f:
@@ -47,21 +40,20 @@ class NewsFeedCrawler:
 
 
     def _fetch_feeds(self):
-        print '_fetch_feeds', self.rss_feed_urls
         for rss_feed_url in self.rss_feed_urls:
+            logger.info("Fetching from: " + rss_feed_url)
             self._fetch_feed(rss_feed_url)
     
     
     def _fetch_feed(self, feed_url):
-        print 'FETCH:', feed_url 
         entries = feedparser.parse(feed_url)['entries']
         for entry in entries:
-            print entry
-            #continue
+            logger.debug("For entry: " + str(entry))
             # date format conversation needed; otherwise error
             entry_json_string = json.dumps(entry, default=self._to_json)
             entry_json = json.loads(entry_json_string)
             try:
+                logger.debug("Dumping following key value in mongo: " + str(entry_json["link"]) + str(entry_json) )
                 self.mongo_collection_articles.update(
                     {
                         "link" : entry_json["link"]
@@ -84,6 +76,6 @@ class NewsFeedCrawler:
         raise TypeError(repr(python_object) + ' is not JSON serializable')
 
 if __name__ == "__main__":
-    file_path = os.getcwd() + '/news-sites-rss-feed-links-sg.txt'
+    file_path = os.getcwd() + '/share_metrics/news-sites-rss-feed-links-sg.txt'
     news_feed_crawler = NewsFeedCrawler(file_path)
     news_feed_crawler.start_crawling()
