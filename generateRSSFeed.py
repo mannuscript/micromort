@@ -50,14 +50,18 @@ class GenerateRSSFeed:
 
 
         for url_count in urls_counts:
-            print url_count[1]
             try: 
                 itemsString += itemString.format(str(urls_titles[url_count[0]]).encode('ascii',errors='ignore'), url_count[0], url_count[1]).encode('ascii', 'ignore')
             except Exception as ex:
                 print ex
 
         itemsString += '</channel></rss>'
-        #print itemsString
+        #Write the rssfeed into the file
+
+        #f = open('/var/www/content/rss.xml', 'w')
+        f = open('./rss.xml', 'w')
+        f.write(itemsString)  # python will convert \n to os.linesep
+        f.close() 
 
 
 if __name__ == "__main__":

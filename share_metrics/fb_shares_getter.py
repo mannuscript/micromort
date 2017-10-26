@@ -58,7 +58,7 @@ class FBSharesGetter:
             return -1
 
     def main(self):
-        urls = self.__getUrlsToCrawl(00)
+        urls = self.__getUrlsToCrawl(0)
         
         logger.info(" Main function called, going to work on " \
                      + str(len(urls)) + " url(s)")
