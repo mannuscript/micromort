@@ -19,3 +19,8 @@ def get_shares_counts(url, html, media):
         logger.error("Failed to load count for url: " + url)
         import traceback
         traceback.print_exc()
+
+
+
+        //*[@id="js-repo-pjax-container"]/div[2]/div[1]/div[2]/div[1]
+        //*[@id="js-repo-pjax-container"]/div[2]/div[1]/div[2]/div[1]/img

@@ -15,7 +15,6 @@ sys.path.insert(0, './resources/configs')
 sys.path.append("./data_stores")
 sys.path.append("./utils")
 from logger import logger
-from mysql import db, cursor
 from mongodb import mongo_collection_articles
 
 class NewsFeedCrawler:
