@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 echo "Getting URLS from RSS feeds"
 `python share_metrics/newsfeedcrawler.py`
 sleep 5
