@@ -85,11 +85,19 @@ from mongodb import mongo_collection_articles
 ```
 
 ## TODO:
- 1. Write parser for: asiaone, businesstimes, todayonline, channelnewsasia
- 2. Setup the crons
- 3. Check if there is any way remove the restriction of running the scripts only from home directory. i.e. if we can do the sys.path.append in a better way!
- 4. 
-
+ 
+ * Scrape (One time) following websites:
+    * SgTalk
+    * harwarezone
+    * Straight times
+	* Asia one
+	* channelnewsasia.com
+	* Today
+ * Get Real time data for following websites using RSS-feed
+ * Modify the share-metric script to fetch data after 15 & 30 days
+ * Integrate more sources of shares/likes to share_metric scripts, 
+    some heads up: https://gist.github.com/jonathanmoore/2640302
+ * Setup the crons :) 
 
 ## License
 This project is licensed under the MIT License.
