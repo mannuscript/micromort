@@ -27,18 +27,18 @@ class GenerateRSSFeed:
     @staticmethod
     def createRssFeed(urls_titles, urls_counts):
         itemString = "<item>\
-            <title>{}</title>\
+            <title><![CDATA[{}]]></title>\
             <link>{}</link>\
             <description>\
                 # of shares: {}\
             </description>\
-            <pubDate>Thu, 1 May 2008 17:03:32 -0800</pubDate>\
+            <pubDate>{}</pubDate>\
         </item>"
 
         itemsString = '<?xml version="1.0" encoding="utf-8"?>\
                 <rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" \
     xmlns:dc="http://purl.org/dc/elements/1.1/" \
-    xmlns:flickr="http://flickr.com/services/feeds/">\
+    xmlns:flickr="http://mannuscript.com/rss.xml">\
     <channel>\
         <title>Trending News! What people are talking about!</title>\
         <link>http://mannuscript.com/</link>\
@@ -58,8 +58,8 @@ class GenerateRSSFeed:
         itemsString += '</channel></rss>'
         # Write the rssfeed into the file
 
-        # f = open('/var/www/content/rss.xml', 'w')
-        f = open('./rss.xml', 'w')
+        f = open('/var/www/content/rss.xml', 'w')
+        #f = open('./rss.xml', 'w')
         f.write(itemsString)  # python will convert \n to os.linesep
         f.close()
 

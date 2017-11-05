@@ -11,7 +11,7 @@ This repo is the scriptpack for the project, containing most of the engineering 
 ### Prerequisites
 
  1. Mysql
-    1. Make sure you have mysql creds stored in ~/.my.cfg. 
+    1. Make sure you have mysql creds stored in ~/.my.cnf
  
  Sample file:
 ```
