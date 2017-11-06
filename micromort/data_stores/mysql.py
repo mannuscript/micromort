@@ -9,6 +9,8 @@ db = MySQLdb.connect(
     host=mysql_config["host"],
     db=mysql_config["db"],
     read_default_file="~/.my.cnf")
+
+# autocommit Seriously :O ?
 db.autocommit(True)
 cursor = db.cursor()
 
