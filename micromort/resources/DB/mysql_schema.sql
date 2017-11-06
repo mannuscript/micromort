@@ -28,9 +28,10 @@ CREATE TABLE `article_social_media_shares` (
   `social_media_channel` varchar(20) DEFAULT NULL,
   `counts` int(32) DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `FK_url_id` (`url_id`),
+  UNIQUE KEY `unique_index` (`url_id`,`social_media_channel`),
   CONSTRAINT `FK_url_id` FOREIGN KEY (`url_id`) REFERENCES `article_urls` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
