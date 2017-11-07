@@ -48,6 +48,15 @@ For creating the schema:
 mysql -uroot -p micromort < /resources/DB/mysql_schema.sql
 ``` 
 
+ 3. Add path to your bash profile.
+Add following line into your bash profile 
+```
+# ~/.bash_profile for mac 
+# ~/.bashrc for ubuntu
+# windows ? what do you mean by windows?
+
+export PYTHONPATH="${PYTHONPATH}:/absolute/path/to/repo/micromort/"
+```
 
 ### Running the scripts
 NOTE: since all paths are defined in the in respect to root directory (e.g. sys.path.append) the scripts can only be triggered from root directory.
@@ -97,6 +106,18 @@ from mongodb import mongo_collection_articles
  * Modify the share-metric script to fetch data after 15 & 30 days
  * Integrate more sources of shares/likes to share_metric scripts, 
     some heads up: https://gist.github.com/jonathanmoore/2640302
+ * Insert instead of update on every fetch of number of shares, so that we can know
+    the amplification of particular article
+    Plan is not to change the current scheme, article_social_media_share will still
+    holds the number of latest counts.Hence:
+        * Create a new table article_social_media_share_history
+        * On every fetch of number of shares for a url, update the entry in 
+            article_social_media_share. if #update > 0 (Thanks to mysql for 
+            providing such information :) ), then go and make a new entry in 
+            article_social_media_share_history. This check is quite crucial as 
+            inserting the same entries in article_social_media_share_history 
+            will bloat it and will become unmanageable even before we publish 
+            a paper :P.
  * Setup the crons :) 
 
 ## License
