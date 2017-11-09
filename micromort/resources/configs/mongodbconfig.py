@@ -5,4 +5,5 @@ mongodb_config = {
     'port': 27017,
     'db': 'micromort',
     'straitstimes_headlines_collection': 'straitstimes_headlines',
-    'straitstimes_article_collection': 'straitstimes_article'}
+    'straitstimes_article_collection': 'straitstimes_article',
+    'collection': 'articles'}
