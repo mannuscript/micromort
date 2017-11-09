@@ -4,4 +4,5 @@ mongodb_config = {
     'host': 'localhost',
     'port': 27017,
     'db': 'micromort',
-    'collection': 'straitstimes'}
+    'straitstimes_headlines_collection': 'straitstimes_headlines',
+    'straitstimes_article_collection': 'straitstimes_article'}

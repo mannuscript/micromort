@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import os
 from micromort.scrapers.straitstimes.straitstimes.items import StraitsTimesHeadlinesItem
+from micromort.resources.configs.mongodbconfig import mongodb_config
+import pymongo
 import re
 
 
@@ -9,9 +10,27 @@ class StraitstimesNewsSpider(scrapy.Spider):
     name = 'straitstimes_news'
     allowed_domains = ['straitstimes.com']
     straitstimes_base_url = 'http://straitstimes.com'
-    categories = ['politics']
+    categories = ['politics', 'asia', 'world', 'multimedia', 'lifestyle', 'forum', 'opinion',
+                  'business', 'sport', 'tech']
     start_urls = map(lambda category: 'http://www.straitstimes.com/' + category + '/latest', categories)
     get_page_pattern = re.compile('.*\?page=([0-9]*)')
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'micromort.scrapers.straitstimes.straitstimes.pipelines.DuplicateNewsPipeline': 300,
+            'micromort.scrapers.straitstimes.straitstimes.pipelines.MongoDBPipeline': 400
+        }
+    }
+
+    def __init__(self, *args, **kwargs):
+        self.MONGODB_URL = mongodb_config['host']
+        self.MONGODB_PORT = mongodb_config['port']
+        self.MONGODB_DB = mongodb_config['db']
+        self.MONGODB_COLLECTION = mongodb_config['straitstimes_headlines_collection']
+        self.client = pymongo.MongoClient(self.MONGODB_URL, self.MONGODB_PORT)
+        self.db = self.client[self.MONGODB_DB]
+        self.collection = self.db[self.MONGODB_COLLECTION]
+        self.unique_index = 'article_url'
+        super(StraitstimesNewsSpider, self).__init__(*args, **kwargs)
 
     def parse(self, response):
         # The latest news is available at http://www.straitstimes.com/<category>/latest[?page=[1, 2, 3]]
@@ -38,7 +57,8 @@ class StraitstimesNewsSpider(scrapy.Spider):
         print 'next url to be scraped %s' % (next_url, )
         yield scrapy.http.Request(next_url, callback=self.parse)
 
-    def parse_headline_page(self, response):
+    @staticmethod
+    def parse_headline_page(response):
         # parse the headlines page and return the item to be stored
         views_row_even = response.css('div.views-row-even')
         views_row_odd = response.css('div.views-row-odd')
@@ -52,13 +72,12 @@ class StraitstimesNewsSpider(scrapy.Spider):
             image_url = headline_card.css('noscript>img::attr(src)').extract_first()
             headline = headline_card.css('span.story-headline>a::text').extract_first()
             article_url = headline_card.css('span.story-headline>a::attr(href)').extract_first()
-            article_url = os.path.join(self.straitstimes_base_url, article_url)
             date_posted_string = headline_card.css('div.node-postdate::attr(data-lapsevalue)').extract_first()
             headline_items.append(StraitsTimesHeadlinesItem(
                 headline=headline,
                 image_url=image_url,
                 article_url=article_url,
-                date=date_posted_string
+                date=date_posted_string,
             ))
 
         return headline_items

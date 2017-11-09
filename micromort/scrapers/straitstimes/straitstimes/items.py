@@ -15,3 +15,8 @@ class StraitsTimesHeadlinesItem(scrapy.Item):
     date = scrapy.Field()
     article_url = scrapy.Field()
 
+
+class StraitsTimesArticlesItem(scrapy.Item):
+    article_url = scrapy.Field()
+    article_text = scrapy.Field()
+

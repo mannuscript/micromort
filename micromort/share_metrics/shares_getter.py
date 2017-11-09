@@ -4,7 +4,6 @@ Refer git meta data for creation details :)
 
 import requests
 import urllib
-import sys
 import datetime
 import json
 from bson.objectid import ObjectId
@@ -16,7 +15,6 @@ from micromort.resources.configs.share_metricconfig import share_metricconfig
 
 
 class SharesGetter:
-
     def __init__(self):
         self.mongoClient = mongo_collection_articles
         self.db = db
@@ -34,7 +32,7 @@ class SharesGetter:
         articles = self.mongoClient.find({"_id": {"$gt": from_id, "$lt": to_id}})
         for article in articles:
             urls.append(article["link"])
-        return urls;
+        return urls
 
     @staticmethod
     def getFBData(url):
@@ -56,9 +54,8 @@ class SharesGetter:
         else:
             return -1
 
-
-
-    def __getLinkedInData(self, url):
+    @staticmethod
+    def __getLinkedInData(url):
         api = share_metricconfig["linkedIn_share_api"].format(url)
         return requests.get(api)
 
@@ -81,11 +78,11 @@ class SharesGetter:
         logger.debug(" list of urls: " + str(urls))
 
         for url in urls:
-            #Get fb count
+            # Get fb count
             count = self.__get_fb_shares(url)
             logger.info("facebook shares for url: " + url + " is: " + str(count))
             self.dumpIntoMysql(url, count, "Facebook")
-            #Get linkedin counts
+            # Get linkedin counts
             count = self.get_linkedIn_shares(url)
             logger.info("linkedin shares for url: " + url + " is: " + str(count))
             self.dumpIntoMysql(url, count, "LinkedIn")
@@ -113,7 +110,7 @@ class SharesGetter:
 
             self.cursor.execute("""INSERT IGNORE INTO article_urls(url) values(%s)""", [url])
             urlId = self.cursor.lastrowid
-            if(not urlId):
+            if not urlId:
                 self.cursor.execute(
                     """SELECT id FROM article_urls WHERE url=%s""",
                     [url]
@@ -142,6 +139,6 @@ if __name__ == "__main__":
     ob.main()
     # url = "http://stylehatch.co"
     # count = ob.get_linkedIn_shares(url)
-    
+
     # logger.info("linkedin shares for url: " + url + " is: " + str(count))
-    #self.dumpIntoMysql(url, count, "LinkedIn")
+    # self.dumpIntoMysql(url, count, "LinkedIn")

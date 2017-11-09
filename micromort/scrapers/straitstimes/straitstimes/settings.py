@@ -63,10 +63,10 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 16
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    'micromort.scrapers.straitstimes.straitstimes.pipelines.DuplicateNewsPipeline': 300,
-    'micromort.scrapers.straitstimes.straitstimes.pipelines.MongoDBPipeline': 400
-}
+# ITEM_PIPELINES = {
+#     'micromort.scrapers.straitstimes.straitstimes.pipelines.DuplicateNewsPipeline': 300,
+#     'micromort.scrapers.straitstimes.straitstimes.pipelines.MongoDBPipeline': 400
+# }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html

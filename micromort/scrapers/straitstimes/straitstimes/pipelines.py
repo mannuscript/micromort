@@ -14,32 +14,22 @@ from scrapy.exceptions import DropItem
 
 class DuplicateNewsPipeline(object):
     def __init__(self):
-        self.client = None
         self.collection = None
-        self.db = None
         self.urls_seen = None
-        self.MONGODB_URL = mongodb_config['host']
-        self.MONGODB_PORT = mongodb_config['port']
-        self.MONGODB_DB = mongodb_config['db']
-        self.MONGODB_COLLECTION = mongodb_config['collection']
+        self.unique_index = None
 
     def process_item(self, item, pipeline):
         print item
-        if item['article_url'] not in self.urls_seen:
-            self.urls_seen.append(item['article_url'])
+        if item[self.unique_index] not in self.urls_seen:
+            self.urls_seen.append(item[self.unique_index])
             return item
         else:
-            raise DropItem("Duplicate news item found with article url {0}".format(item['article_url']))
+            raise DropItem("Duplicate news item found with article url {0}".format(item[self.unique_index]))
 
     def open_spider(self, spider):
-        MONGODB_URL = self.MONGODB_URL
-        MONGODB_PORT = int(self.MONGODB_PORT)
-        MONGODB_DB = self.MONGODB_DB
-        MONGODB_COLLECTION = self.MONGODB_COLLECTION
-        self.client = pymongo.MongoClient(MONGODB_URL, MONGODB_PORT)
-        self.db = self.client[MONGODB_DB]
-        self.collection = self.db[MONGODB_COLLECTION]
-        self.urls_seen = self.collection.distinct('article_url')
+        self.collection = spider.collection
+        self.unique_index = spider.unique_index
+        self.urls_seen = self.collection.distinct(self.unique_index)
 
     def close_spider(self, spider):
         self.client.close()
@@ -48,13 +38,8 @@ class DuplicateNewsPipeline(object):
 class MongoDBPipeline(object):
 
     def __init__(self):
-        self.client = None
         self.collection = None
-        self.db = None
-        self.MONGODB_URL = mongodb_config['host']
-        self.MONGODB_PORT = mongodb_config['port']
-        self.MONGODB_DB = mongodb_config['db']
-        self.MONGODB_COLLECTION = mongodb_config['collection']
+        self.client = None
 
     def process_item(self, item, spider):
         self.collection.insert(dict(item))
@@ -62,15 +47,8 @@ class MongoDBPipeline(object):
         return item
 
     def open_spider(self, spider):
-        MONGODB_URL = self.MONGODB_URL
-        MONGODB_PORT = int(self.MONGODB_PORT)
-        MONGODB_DB = self.MONGODB_DB
-        MONGODB_COLLECTION = self.MONGODB_COLLECTION
-        self.client = pymongo.MongoClient(MONGODB_URL, MONGODB_PORT)
-
-        self.db = self.client[MONGODB_DB]
-        self.collection = self.db[MONGODB_COLLECTION]
+        self.collection = spider.collection
+        self.client = spider.client
 
     def close_spider(self, spider):
         self.client.close()
-
