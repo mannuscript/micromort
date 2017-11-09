@@ -96,9 +96,9 @@ from mongodb import mongo_collection_articles
 ## TODO:
  
  * Scrape (One time) following websites:
-    * SgTalk
-    * harwarezone
-    * Straight times
+	:white_check_mark: SgTalk
+	* harwarezone
+	:white_check_mark: Straits times
 	* Asia one
 	* channelnewsasia.com
 	* Today
