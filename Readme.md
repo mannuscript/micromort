@@ -95,13 +95,16 @@ from mongodb import mongo_collection_articles
 
 ## TODO:
  
- * Scrape (One time) following websites:
-	:white_check_mark: * SgTalk	
-	* harwarezone
-	:white_check_mark: * Straits times
-	* Asia one
-	* channelnewsasia.com
-	* Today
+Scrape (One time) following websites:
+
+✅ SgTalk	
+
+- harwarezone
+- ✅  Straits times
+- Asia one
+- channelnewsasia.com
+- Today
+
  * Get Real time data for following websites using RSS-feed
  * Modify the share-metric script to fetch data after 15 & 30 days
  * Integrate more sources of shares/likes to share_metric scripts, 
