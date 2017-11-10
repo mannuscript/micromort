@@ -5,12 +5,14 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
+
 from scrapy import log
 from scrapy.exceptions import DropItem
 
 
 class DuplicateNewsPipeline(object):
     def __init__(self):
+        self.client = None
         self.collection = None
         self.urls_seen = None
         self.unique_index = None
@@ -24,6 +26,7 @@ class DuplicateNewsPipeline(object):
             raise DropItem("Duplicate news item found with article url {0}".format(item[self.unique_index]))
 
     def open_spider(self, spider):
+        self.client = spider.client
         self.collection = spider.collection
         self.unique_index = spider.unique_index
         self.urls_seen = self.collection.distinct(self.unique_index)
