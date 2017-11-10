@@ -3,10 +3,7 @@ Project Micromort (Micro + Mortality) started at --- lab, NUS is the first attem
 This repo is the scriptpack for the project, containing most of the engineering work we are doing (which can be public also).
 
 #### Scripts:
-1. Share Metric: Get the number of (FB) shares for news articles posted on popular news websites.
-    1. [./share_metrics/newsfeedcrawler.py](./share_metrics/newsfeedcrawler.py) : Get the URLs of the news article from the predefined list of RSS feeders and store them in Mongo.
-    2. [./share_metrics/parsers/main.py](./share_metrics/parsers/main.py) : After few days (15/30 ?) get those URLS from mongo and crawl the webpages to get the the number of shares. Finally storing the data into mysql ([micromort db](./resources/DB/mysql_schema.sql))
-
+------TODO
 
 ### Prerequisites
 
@@ -59,17 +56,7 @@ export PYTHONPATH="${PYTHONPATH}:/absolute/path/to/repo/micromort/"
 ```
 
 ### Running the scripts
-NOTE: since all paths are defined in the in respect to root directory (e.g. sys.path.append) the scripts can only be triggered from root directory.
-1. Share Metric: (Make sure mongo is running)
-    1. Get the urls: 
-    ```
-    python ./share_metrics/newsfeedcrawler.py
-    ``` 
-
-    2. Get the number of shares
-    ```
-    python ./share_metrics/parsers/main.py
-    ```
+----
 
 ### Contributing
 Please consider following practices while contributing to the repo
@@ -97,8 +84,7 @@ from mongodb import mongo_collection_articles
  
 Scrape (One time) following websites:
 
-✅ SgTalk	
-
+- SgTalk
 - harwarezone
 - ✅  Straits times
 - Asia one

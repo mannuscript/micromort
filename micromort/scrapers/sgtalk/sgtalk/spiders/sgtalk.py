@@ -15,11 +15,9 @@ class SgtalkSpider(scrapy.Spider):
         for thread in threads:
             threadUrl = thread.css('span > a::attr(href)').extract_first()
             yield scrapy.Request(url=response.urljoin(threadUrl), callback=self.parseThreads)
-            print response.urljoin(threadUrl)
         next_page_url = response.css('#content > div:nth-child(5) > table > tr > td:nth-child(1) > div:nth-child(1) > div.float_left > div > a.pagination_next::attr(href)').extract_first()
         next_page_url = response.urljoin(next_page_url)
         if next_page_url:
-            print "going to", next_page_url
             yield scrapy.Request(url=next_page_url, callback=self.parse)
 
     def parseThreads(self, response):
@@ -57,5 +55,4 @@ class SgtalkSpider(scrapy.Spider):
         next_page_url = response.css('#content > table > tr > td:nth-child(1) > div:nth-child(7) > div > a.pagination_next::attr(href)').extract_first()
         if next_page_url:
             next_page_url = response.urljoin(next_page_url)
-            print "going to", next_page_url
             yield scrapy.Request(url=next_page_url, callback=self.parseThreads)

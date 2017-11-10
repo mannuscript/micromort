@@ -6,4 +6,10 @@ mongodb_config = {
     'db': 'micromort',
     'straitstimes_headlines_collection': 'straitstimes_headlines',
     'straitstimes_article_collection': 'straitstimes_article',
+    'dbs': {
+        'forums' :{
+            "sgtalk":"sgtalk",
+            "hdwzone":'hdwzone'
+        }
+    },
     'collection': 'articles'}
