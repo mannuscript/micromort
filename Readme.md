@@ -4,6 +4,8 @@ This repo is the scriptpack for the project, containing most of the engineering 
 
 #### Scripts:
 ------TODO
+1. Generate RSS feed
+2. Get social media shares/likes
 
 ### Prerequisites
 
@@ -83,13 +85,15 @@ from mongodb import mongo_collection_articles
 ## TODO:
  
 Scrape (One time) following websites:
-
-- SgTalk
-- harwarezone
-- ✅  Straits times
+Forums:
+- ✅ SgTalk
+- ✅ harwarezone
+News Websites:
+- ✅ Straits times
 - Asia one
 - channelnewsasia.com
 - Today
+- Stomp
 
  * Get Real time data for following websites using RSS-feed
  * Modify the share-metric script to fetch data after 15 & 30 days
@@ -99,14 +103,15 @@ Scrape (One time) following websites:
     the amplification of particular article
     Plan is not to change the current scheme, article_social_media_share will still
     holds the number of latest counts.Hence:
-        * Create a new table article_social_media_share_history
-        * On every fetch of number of shares for a url, update the entry in 
+    * Create a new table article_social_media_share_history
+    * On every fetch of number of shares for a url, update the entry in 
             article_social_media_share. if #update > 0 (Thanks to mysql for 
             providing such information :) ), then go and make a new entry in 
             article_social_media_share_history. This check is quite crucial as 
             inserting the same entries in article_social_media_share_history 
             will bloat it and will become unmanageable even before we publish 
             a paper :P.
+ * Integrate open graph API for likes (Currently we are just getting number of shares)
  * Setup the crons :) 
 
 ## License
