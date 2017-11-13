@@ -85,9 +85,11 @@ from mongodb import mongo_collection_articles
 ## TODO:
  
 Scrape (One time) following websites:
+
 Forums:
 - ✅ SgTalk
 - ✅ harwarezone
+
 News Websites:
 - ✅ Straits times
 - Asia one
