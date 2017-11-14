@@ -89,6 +89,7 @@ Scrape (One time) following websites:
 Forums:
 - ✅ SgTalk
 - ✅ harwarezone
+- (sub) reddit Singapore (Headsup: https://www.find-me.co/blog/reddit_creators)
 
 News Websites:
 - ✅ Straits times
