@@ -92,20 +92,23 @@ class SharesGetter:
         # insert into article_urls and get the insert id
         try:
             """
-                Ok, Next few steps are going to be a little confusing... you 
+                Ok, next few steps are going to be a little confusing... you 
                 should grab some popcorn and sit tight!
 
-                We first do an insert ignore into article_urls, as
-                no point of inserting same url twice.
-                Then use LAST_INSERT_ID to get the "last insert id" (obviously),
-                But consider the case when insert was ignored, 
-                there were no insert hence no Last_insert_id
-                
+                We first do an "insert ignore" into article_urls (url field has unique index 
+                constraint), as no point of inserting same url twice.
+                Then use lastrowid to get the id of last insertion,
+                However consider the case when the row is not inserted (Reapted),
                 Now according to this fellow:
                 https://stackoverflow.com/questions/6291405/mysql-after-insert-ignore-get-primary-key
-
                 LAST_INSERT_ID would be zero for ignored case,
-                Bingo! just do a select if you find this case.
+                Bingo! just a select in such cases to get the url_id.
+
+                then:
+                With socialMediachannel, counts, urlId: Do a insert on duplicate update in 
+                article_social_media_shares table, if the effected rows are not zero (either 
+                new entry of change in th counts) create a new entry in 
+                article_social_media_shares_history
             """
 
             self.cursor.execute("""INSERT IGNORE INTO article_urls(url) values(%s)""", [url])
@@ -117,15 +120,24 @@ class SharesGetter:
                 )
                 urlId = cursor.fetchone()[0]
             # insert into article_social_media_shares
-            self.cursor.execute(
+            effectedRows = self.cursor.execute(
                 """INSERT INTO article_social_media_shares(url_id, social_media_channel, counts)
                 values(%s, %s, %s) ON DUPLICATE KEY UPDATE counts=%s """, [urlId, socialMediaChannel, count, count])
+            
+            if effectedRows and count != -1:
+                self.cursor.execute(
+                    """INSERT INTO  article_social_media_shares_history(url_id,  
+                        social_media_channel, counts) values(%s, %s, %s)
+                    """,  [urlId, socialMediaChannel, count])
+
         except Exception as ex:
             logger.error(ex)
 
 
 if __name__ == "__main__":
     ob = SharesGetter()
+    url = " http://www.straitstimes.com/tech/audio/beats-studio3-wireless-review-a-great-pair-of-headphones-for-ios-devices"
+
     # counter = 0;
     # while(True):
     #     res = ob.getFBData("http://www.straitstimes.com/sport/football/football-vialli-says-england-struggle-to-handle-pressure")
@@ -136,7 +148,7 @@ if __name__ == "__main__":
     #     counter = counter + 1;
     #     print counter
     #
-    ob.main()
+    ob.dumpIntoMysql(url,-1, 'Facebook')
     # url = "http://stylehatch.co"
     # count = ob.get_linkedIn_shares(url)
 

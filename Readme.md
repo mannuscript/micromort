@@ -6,6 +6,7 @@ This repo is the scriptpack for the project, containing most of the engineering 
 ------TODO
 1. Generate RSS feed
 2. Get social media shares/likes
+3. Scrappers
 
 ### Prerequisites
 
@@ -58,7 +59,23 @@ export PYTHONPATH="${PYTHONPATH}:/absolute/path/to/repo/micromort/"
 ```
 
 ### Running the scripts
-----
+#### Scrapper: 
+ 1. Sgtalk scrappers: Starting from "sgtalk.org" page it crawl all thread and posts on 
+ sgtalk and stores the [following data](./docs/scrapped_data_formats/sgtalk.md) data in mongo db (sgtalk/posts).
+ ```
+cd micromort/scrapers/sgtalk/sgtalk/
+scrapy crawl sgtalk
+ ```
+ 
+ #### Share metrics:
+  1. Run Rss feeder to get the urls of the articles 
+```
+python micromort/share_metrics/newsfeedcrawler.py
+```
+ 2. Get share/liked counts:
+ ```
+ python micromort/share_metrics/shares_getter.py
+ ``` 
 
 ### Contributing
 Please consider following practices while contributing to the repo
@@ -102,18 +119,6 @@ News Websites:
  * Modify the share-metric script to fetch data after 15 & 30 days
  * Integrate more sources of shares/likes to share_metric scripts, 
     some heads up: https://gist.github.com/jonathanmoore/2640302
- * Insert instead of update on every fetch of number of shares, so that we can know
-    the amplification of particular article
-    Plan is not to change the current scheme, article_social_media_share will still
-    holds the number of latest counts.Hence:
-    * Create a new table article_social_media_share_history
-    * On every fetch of number of shares for a url, update the entry in 
-            article_social_media_share. if #update > 0 (Thanks to mysql for 
-            providing such information :) ), then go and make a new entry in 
-            article_social_media_share_history. This check is quite crucial as 
-            inserting the same entries in article_social_media_share_history 
-            will bloat it and will become unmanageable even before we publish 
-            a paper :P.
  * Integrate open graph API for likes (Currently we are just getting number of shares)
  * Setup the crons :) 
 
