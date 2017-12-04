@@ -58,6 +58,12 @@ Add following line into your bash profile
 export PYTHONPATH="${PYTHONPATH}:/absolute/path/to/repo/micromort/"
 ```
 
+ 4. Unique database and indexes in mongo
+ ```
+ use sgtalk
+ db.posts.createIndex( {"post.post_url" : 1 }, {"unique": true })
+ ``` 
+
 ### Running the scripts
 #### Scrapper: 
  1. Sgtalk scrappers: Starting from "sgtalk.org" page it crawl all thread and posts on 
