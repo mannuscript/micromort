@@ -122,5 +122,8 @@ News Websites:
  * Integrate open graph API for likes (Currently we are just getting number of shares)
  * Setup the crons :) 
 
+#### Issues:
+- Handle non 200 response in scrappers.
+
 ## License
 This project is licensed under the MIT License.
