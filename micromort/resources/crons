@@ -1,2 +1,5 @@
-#Crontab entry for running the pipeline for share_metric
+#Crontab entry 
+#Hourly cron for share_metric
 00 * * * * cd /home/mannu/micromort/ &&  sudo bash pipeline.sh > pipeline.logs 2>&1
+#Daily cron for sgtalk
+00 3 * * * cd /home/mannu/code/work/micromort/micromort/scrapers/sgtalk/ && scrapy crawl sgtalk > crawl.logs 2>&1
