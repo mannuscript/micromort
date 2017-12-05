@@ -7,7 +7,6 @@ class SgtalkSpider(scrapy.Spider):
     allowed_domains = ['sgtalk.org']
     start_urls = ['http://sgtalk.org/mybb/']
     custom_settings = {
-
     }
 
     def parse(self, response):

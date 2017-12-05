@@ -13,6 +13,12 @@ from micromort.data_stores.mysql import db, cursor
 from micromort.utils.logger import logger
 from micromort.resources.configs.share_metricconfig import share_metricconfig
 
+#Helper functions
+def batch(iterable, n=1):
+    l = len(iterable)
+    for ndx in range(0, l, n):
+        yield iterable[ndx:min(ndx + n, l)]
+
 
 class SharesGetter:
     def __init__(self):
@@ -35,10 +41,11 @@ class SharesGetter:
         return urls
 
     @staticmethod
-    def getFBData(url):
-        url = urllib.quote(url)
+    def getFBData(urls):
+        urls_string = ','.join(map(str,urls))
+        urls_string = urllib.quote(urls_string)
         access_token = share_metricconfig["app_access_token"]
-        api = share_metricconfig["fb_graph_api"].format(access_token, url)
+        api = share_metricconfig["fb_graph_api"].format( urls_string,access_token)
         headers = share_metricconfig["headers"]
         r = requests.get(api, headers=headers)
         return r
@@ -59,41 +66,73 @@ class SharesGetter:
         api = share_metricconfig["linkedIn_share_api"].format(url)
         return requests.get(api)
 
-    def __get_fb_shares(self, url):
-        res = self.getFBData(url)
+    def __get_fb_shares(self, urls):
+        res = self.getFBData(urls)
         if res and res.status_code == 200:
             try:
-                return json.loads(res.text)["og_object"]["engagement"]["count"]
+                respJsons = json.loads(res.text)
+                result = []
+                for url in respJsons:
+                    result.append( {
+                        "url" : url,
+                        "type" :  "Facebook_comment_count",
+                        "count" :  respJsons[url]["engagement"]["comment_count"]
+                    } )
+                    result.append( {
+                        "url" : url,
+                        "type" : "Facebook_share_count", 
+                        "count" : respJsons[url]["engagement"]["share_count"]
+                    } )
+                    result.append( {
+                        "url" : url,
+                        "type" : "Facebook_reaction_count",
+                        "count" : respJsons[url]["engagement"]["reaction_count"]
+                    } )
+                    
+                return result
             except Exception as ex:
                 logger.error("Failed to load count for url: " + url)
                 return -1
         else:
             return -1
 
-    def main(self):
-        urls = self.__getUrlsToCrawl(1)
+    """
+        @day: picks (from mongo) url fetched during given day
+            0: today
+            1: yesterday
+            and so on
+    """
+    def main(self, day):
+        urls = self.__getUrlsToCrawl(day)
 
         logger.info(" Main function called, going to work on " \
                     + str(len(urls)) + " url(s)")
         logger.debug(" list of urls: " + str(urls))
 
-        for url in urls:
-            # Get fb count
-            count = self.__get_fb_shares(url)
-            logger.info("facebook shares for url: " + url + " is: " + str(count))
-            self.dumpIntoMysql(url, count, "Facebook")
-            # Get linkedin counts
-            count = self.get_linkedIn_shares(url)
-            logger.info("linkedin shares for url: " + url + " is: " + str(count))
-            self.dumpIntoMysql(url, count, "LinkedIn")
+        url_chunks = batch(urls, 10)
+
+        for url_chunk in url_chunks:
+            # Get fb counts
+            fb_counts = self.__get_fb_shares(url_chunk)
+            for row in fb_counts:
+                url = row["url"]
+                countType = row["type"]
+                count = row["count"]
+                logger.info(countType + " for url: " + url + " is: " + str(count))
+            for url in url_chunk:
+                self.dumpIntoMysql(url, count,  countType)
+                # Get linkedin counts
+                linkedIn_count = self.get_linkedIn_shares(url)
+                logger.info("linkedin shares for url: " + url + " is: " + str(count))
+                self.dumpIntoMysql(url, count,  "LinkedIn")
 
     def dumpIntoMysql(self, url, count, socialMediaChannel):
         # Pain of normalization: run 2 insert query:
         # insert into article_urls and get the insert id
         try:
             """
-                Ok, next few steps are going to be a little confusing... you 
-                should grab some popcorn and sit tight!
+                Ok, next few steps are going to be a little confusing... 
+                grab some popcorn and sit tight!
 
                 We first do an "insert ignore" into article_urls (url field has unique index 
                 constraint), as no point of inserting same url twice.
@@ -136,8 +175,11 @@ class SharesGetter:
 
 if __name__ == "__main__":
     ob = SharesGetter()
-    url = " http://www.straitstimes.com/tech/audio/beats-studio3-wireless-review-a-great-pair-of-headphones-for-ios-devices"
-
+    #run them for last 30 days (including today)! 30 ? :O (This has to be stopped)
+    #for i in range(0,30):
+    #    ob.main(i)
+    ob.main(0)
+    #url = " http://www.straitstimes.com/tech/audio/beats-studio3-wireless-review-a-great-pair-of-headphones-for-ios-devices"
     # counter = 0;
     # while(True):
     #     res = ob.getFBData("http://www.straitstimes.com/sport/football/football-vialli-says-england-struggle-to-handle-pressure")
@@ -148,7 +190,7 @@ if __name__ == "__main__":
     #     counter = counter + 1;
     #     print counter
     #
-    ob.dumpIntoMysql(url,-1, 'Facebook')
+    #ob.dumpIntoMysql(url,0, 'Facebook')
     # url = "http://stylehatch.co"
     # count = ob.get_linkedIn_shares(url)
 

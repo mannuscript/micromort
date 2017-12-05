@@ -1,0 +1,2 @@
+#Crontab entry for running the pipeline for share_metric
+00 * * * * cd /home/mannu/micromort/ &&  sudo bash pipeline.sh > pipeline.logs 2>&1

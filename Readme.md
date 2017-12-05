@@ -64,6 +64,8 @@ export PYTHONPATH="${PYTHONPATH}:/absolute/path/to/repo/micromort/"
  db.posts.createIndex( {"post.post_url" : 1 }, {"unique": true })
  ``` 
 
+ 5. Crontab entries are in [crons file](./micromort/resources/crons)
+
 ### Running the scripts
 #### Scrapper: 
  1. Sgtalk scrappers: Starting from "sgtalk.org" page it crawl all thread and posts on 
@@ -127,6 +129,7 @@ News Websites:
     some heads up: https://gist.github.com/jonathanmoore/2640302
  * Integrate open graph API for likes (Currently we are just getting number of shares)
  * Setup the crons :) 
+ * Move the mysql database from local machine to some common machine
 
 #### Issues:
 - Handle non 200 response in scrappers.
