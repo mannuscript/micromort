@@ -20,8 +20,7 @@ class SgtalkSpider(scrapy.Spider):
     name = 'sgtalk'
     allowed_domains = ['sgtalk.org']
     start_urls = ['http://sgtalk.org/mybb/']
-    custom_settings = {
-    }
+    custom_settings = {}
 
     def parse(self, response):
         threads =  response.css('#content > div:nth-child(5) > table >  tr > td:nth-child(1) > table > tr')
