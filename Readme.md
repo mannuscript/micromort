@@ -124,15 +124,8 @@ News Websites:
 - Stomp
 
  * Get Real time data for following websites using RSS-feed
- * Modify the share-metric script to fetch data after 15 & 30 days
- * Integrate more sources of shares/likes to share_metric scripts, 
-    some heads up: https://gist.github.com/jonathanmoore/2640302
- * Integrate open graph API for likes (Currently we are just getting number of shares)
- * Setup the crons :) 
  * Move the mysql database from local machine to some common machine
-
-#### Issues:
-- Handle non 200 response in scrappers.
+ * Setup a daily email report to get the number of data fetched everyday 
 
 ## License
 This project is licensed under the MIT License.

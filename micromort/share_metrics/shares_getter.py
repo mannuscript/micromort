@@ -119,12 +119,14 @@ class SharesGetter:
                 countType = row["type"]
                 count = row["count"]
                 logger.info(countType + " for url: " + url + " is: " + str(count))
-            for url in url_chunk:
                 self.dumpIntoMysql(url, count,  countType)
+
+                
+            for url in url_chunk:
                 # Get linkedin counts
                 linkedIn_count = self.get_linkedIn_shares(url)
-                logger.info("linkedin shares for url: " + url + " is: " + str(count))
-                self.dumpIntoMysql(url, count,  "LinkedIn")
+                logger.info("linkedin shares for url: " + url + " is: " + str(linkedIn_count))
+                self.dumpIntoMysql(url, linkedIn_count,  "LinkedIn")
 
     def dumpIntoMysql(self, url, count, socialMediaChannel):
         # Pain of normalization: run 2 insert query:
