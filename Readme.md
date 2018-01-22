@@ -3,10 +3,10 @@ Project Micromort (Micro + Mortality) started at --- lab, NUS is the first attem
 This repo is the scriptpack for the project, containing most of the engineering work we are doing (which can be public also).
 
 #### Scripts:
-1. Share Metric: Get the number of (FB) shares for news articles posted on popular news websites.
-    1. [./share_metrics/newsfeedcrawler.py](./share_metrics/newsfeedcrawler.py) : Get the URLs of the news article from the predefined list of RSS feeders and store them in Mongo.
-    2. [./share_metrics/parsers/main.py](./share_metrics/parsers/main.py) : After few days (15/30 ?) get those URLS from mongo and crawl the webpages to get the the number of shares. Finally storing the data into mysql ([micromort db](./resources/DB/mysql_schema.sql))
-
+------TODO
+1. Generate RSS feed
+2. Get social media shares/likes
+3. Scrappers
 
 ### Prerequisites
 
@@ -58,18 +58,32 @@ Add following line into your bash profile
 export PYTHONPATH="${PYTHONPATH}:/absolute/path/to/repo/micromort/"
 ```
 
-### Running the scripts
-NOTE: since all paths are defined in the in respect to root directory (e.g. sys.path.append) the scripts can only be triggered from root directory.
-1. Share Metric: (Make sure mongo is running)
-    1. Get the urls: 
-    ```
-    python ./share_metrics/newsfeedcrawler.py
-    ``` 
+ 4. Unique database and indexes in mongo
+ ```
+ use sgtalk
+ db.posts.createIndex( {"post.post_url" : 1 }, {"unique": true })
+ ``` 
 
-    2. Get the number of shares
-    ```
-    python ./share_metrics/parsers/main.py
-    ```
+ 5. Crontab entries are in [crons file](./micromort/resources/crons)
+
+### Running the scripts
+#### Scrapper: 
+ 1. Sgtalk scrappers: Starting from "sgtalk.org" page it crawl all thread and posts on 
+ sgtalk and stores the [following data](./docs/scrapped_data_formats/sgtalk.md) data in mongo db (sgtalk/posts).
+ ```
+cd micromort/scrapers/sgtalk/sgtalk/
+scrapy crawl sgtalk
+ ```
+ 
+ #### Share metrics:
+  1. Run Rss feeder to get the urls of the articles 
+```
+python micromort/share_metrics/newsfeedcrawler.py
+```
+ 2. Get share/liked counts:
+ ```
+ python micromort/share_metrics/shares_getter.py
+ ``` 
 
 ### Contributing
 Please consider following practices while contributing to the repo
@@ -95,30 +109,23 @@ from mongodb import mongo_collection_articles
 
 ## TODO:
  
- * Scrape (One time) following websites:
-    * SgTalk
-    * harwarezone
-    * Straight times
-	* Asia one
-	* channelnewsasia.com
-	* Today
+Scrape (One time) following websites:
+
+Forums:
+- ✅ SgTalk
+- ✅ harwarezone
+- (sub) reddit Singapore (Headsup: https://www.find-me.co/blog/reddit_creators)
+
+News Websites:
+- ✅ Straits times
+- Asia one
+- channelnewsasia.com
+- Today
+- Stomp
+
  * Get Real time data for following websites using RSS-feed
- * Modify the share-metric script to fetch data after 15 & 30 days
- * Integrate more sources of shares/likes to share_metric scripts, 
-    some heads up: https://gist.github.com/jonathanmoore/2640302
- * Insert instead of update on every fetch of number of shares, so that we can know
-    the amplification of particular article
-    Plan is not to change the current scheme, article_social_media_share will still
-    holds the number of latest counts.Hence:
-        * Create a new table article_social_media_share_history
-        * On every fetch of number of shares for a url, update the entry in 
-            article_social_media_share. if #update > 0 (Thanks to mysql for 
-            providing such information :) ), then go and make a new entry in 
-            article_social_media_share_history. This check is quite crucial as 
-            inserting the same entries in article_social_media_share_history 
-            will bloat it and will become unmanageable even before we publish 
-            a paper :P.
- * Setup the crons :) 
+ * Move the mysql database from local machine to some common machine
+ * Setup a daily email report to get the number of data fetched everyday 
 
 ## License
 This project is licensed under the MIT License.

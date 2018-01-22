@@ -7,13 +7,13 @@ Title: Title
 updated_at : Posted/updated at datetime
 user: Details of the poster 
     url: URL to the profile
-    reputation: of the user at the time ofcrawing the page
+    reputation: of the user at the time of crawling the page
     Name & id : Name and user_id
 
 Thread_url : URL of the parent thread 
 post : 
-    content: Actaul content (Html format)
-    post_number: post_nimber=1 represents the main thread topic, 2-N represent replies to the thread
+    content: actual content (Html format)
+    post_number: post_number=1 represents the main thread topic, 2 to N represent replies to the thread
     post_time : ...
     post_url: Every post has its own unique url, irrespective of thread's url
 

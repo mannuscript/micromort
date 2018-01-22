@@ -7,4 +7,12 @@ mongodb_config = {
     'straitstimes_headlines_collection': 'straitstimes_headlines',
     'straitstimes_article_collection': 'straitstimes_article',
     'collection': 'articles',
-    'asiaone_headlines_collection': 'asiaone_headlines'}
+    'asiaone_headlines_collection': 'asiaone_headlines',
+    'dbs': {
+        'forums': {
+            "sgtalk": "sgtalk",
+            "hdwzone": 'hdwzone'
+        }
+    },
+    'collection': 'articles'
+    }
