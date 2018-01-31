@@ -18,7 +18,6 @@ class DuplicateNewsPipeline(object):
         self.unique_index = None
 
     def process_item(self, item, pipeline):
-        print item
         if item[self.unique_index] not in self.urls_seen:
             self.urls_seen.append(item[self.unique_index])
             return item

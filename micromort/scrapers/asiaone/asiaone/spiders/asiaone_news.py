@@ -49,7 +49,7 @@ class AsiaoneNewsSpider(scrapy.Spider):
             next_url[2] = next_page
             next_url = ''.join(next_url)
 
-        print 'next url to be scraped %s' % (next_url,)
+        print('next url to be scraped %s' % (next_url,))
         yield scrapy.http.Request(next_url, callback=self.parse)
 
     def get_cards_info(self, cards):

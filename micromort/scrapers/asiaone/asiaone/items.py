@@ -14,3 +14,10 @@ class AsiaOneHeadlineItem(scrapy.Item):
     headline_text = scrapy.Field()
     image_url = scrapy.Field()
     article_url = scrapy.Field()
+
+
+class AsiaoneArticlesItem(scrapy.Item):
+    article_url = scrapy.Field()
+    article_text = scrapy.Field()
+    article_date = scrapy.Field()
+    article_summary = scrapy.Field()

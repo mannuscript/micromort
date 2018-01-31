@@ -40,6 +40,9 @@ class StraitstimesNewsSpider(scrapy.Spider):
         # scrap the leading page and yield requests for more pages
         headline_items = self.parse_headline_page(response)
 
+        if not headline_items:
+            return
+
         for headline_item in headline_items:
             yield headline_item
 

@@ -1,6 +1,5 @@
 import logging
 
-
 from micromort.resources.configs.loggerconfig import logger_config
 
 if logger_config["level"] == "INFO":

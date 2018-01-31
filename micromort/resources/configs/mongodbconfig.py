@@ -8,6 +8,7 @@ mongodb_config = {
     'straitstimes_article_collection': 'straitstimes_article',
     'collection': 'articles',
     'asiaone_headlines_collection': 'asiaone_headlines',
+    'asiaone_article_collection': 'asiaone_article',
     'dbs': {
         'forums': {
             "sgtalk": "sgtalk",
