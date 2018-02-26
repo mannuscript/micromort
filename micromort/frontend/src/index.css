@@ -1,0 +1,135 @@
+body {
+  margin: 0px;
+}
+
+/********************************************
+
+              PAGINATION STYLES
+
+********************************************/
+
+.pagination {
+  background-color: rgba(21, 101, 192, 0.85);
+  padding: 20px;
+  max-width: 550px;
+  border-radius: 5px;
+  display:inline-block;
+}
+
+
+.pagination li {
+  display: inline-block;
+  margin-right: 20px;
+  margin-top:2px;
+  margin-bottom:2px;
+
+}
+.pagination li.active{
+  border: 1.5px solid #3F51B5;
+  border-radius: 50%;
+  width: 25px;
+  line-height:25px;
+  text-align: center;
+  list-style-type: none;
+
+}
+
+.pagination li>a {
+  cursor: pointer;
+  color: #eeeeee;
+
+
+}
+
+
+.pagination .break a {
+    cursor: default;
+    text-decoration: none;
+}
+
+.pagination .active {
+
+}
+
+.pagination .previous .next {
+    font-family: "Roboto, Helvetica";
+    font-size: 1.2rem;
+}
+
+/********************************************
+
+              CHARTIST STYLES
+
+********************************************/
+.ct-chart{
+  background-color: rgba(102,187,106, 0.95);
+}
+
+.ct-series-a .ct-bar
+{
+  /* Colour of your bars */
+  stroke: #E8EAF6 !important;
+}
+
+.ct-series-b .ct-bar {
+  stroke: #1B5E20 !important;
+}
+
+.ct-label {
+  color: #E8EAF6;
+}
+
+.ct-grids line {
+  stroke: #E8EAF6;
+}
+
+.ct-series-a .ct-area {  
+  fill-opacity:0.4;
+}
+
+
+/********************************************
+
+              BUBBLE CHART STYLES
+
+********************************************/
+/* Center the contents of the bubble chart */
+.bubble-chart-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  user-select: none;
+  justify-content: center;
+}
+
+/* Center text in the circle, and hide any overflow */
+.bubble-chart-container .bubble-chart-text .bubble-label {
+  text-align: center;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border-radius: 50%;
+  will-change: left, top, height, width;
+}
+
+/* Show the overflow when hovering over a label */
+.bubble-chart-container .bubble-chart-text .bubble-label:hover {
+  overflow: visible;
+  font-weight: bold;
+}
+
+/* Optional, but recommended - reduce the size of text on medium bubbles */
+.bubble-chart-container .bubble-chart-text .bubble-label.medium {
+  font-size: 0.8em;
+}
+
+/* Optional, but recommended - hide the text on small bubbles */
+.bubble-chart-container .bubble-chart-text .bubble-label.small {
+  font-size: 0;
+}
+/* Make sure to unhide the text when hovering */
+.bubble-chart-container .bubble-chart-text .bubble-label.small:hover {
+  font-size: 0.8em;
+}
