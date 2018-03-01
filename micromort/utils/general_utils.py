@@ -5,14 +5,23 @@ import re
 import micromort.constants as constants
 import os
 from tqdm import tqdm
-
+import pickle
+import h5py
 
 FILE_PATHS = constants.PATHS
 OUTPUTS_DIR = FILE_PATHS['OUTPUTS_DIR']
 ARTICLE_LENGTH_THRESHOLD = constants.ARTICLE_LENGTH_PREP
 
 
-def prep_asione_for_labeling():
+def partition_lists(lst, n):
+    """
+        given a list it is partitioned into n sub lists
+    """
+    division = len(lst) / float(n)
+    return [lst[int(round(division * i)): int(round(division * (i + 1)))] for i in range(n)]
+
+
+def prep_asiaone_for_labeling():
     MONGO_URL = mongodb_config['host']
     MONGO_PORT = mongodb_config['port']
     MONGO_DB = mongodb_config['db']
@@ -114,6 +123,49 @@ def prep_straitstimes_for_labeling():
                 if len(article_text) > ARTICLE_LENGTH_THRESHOLD:
                     fp.write('\t'.join([headline_text, article_url, category, article_summary, utc_time]))
                     fp.write("\n")
+
+
+def save_pickle(obj, filename):
+    with open(filename, 'wb') as fp:
+        pickle.dump(obj, fp)
+
+
+def load_pickle(filename):
+    with open(filename, 'rb') as fp:
+        return pickle.load(fp)
+
+
+def read_array_from_hdf_file(filepath, object_name):
+    """
+
+    Args:
+        filepath: The full path of the h5 file
+        object_name: The name of the object stored in the file
+
+    Returns: Numpy array strored in the file
+
+    """
+    file_handle = h5py.File(filepath, 'r')
+    array = file_handle[object_name][:]
+    file_handle.close()
+
+    return array
+
+
+def write_array_to_hdf_file(filepath, objectname, data):
+    """
+
+    Args:
+        filepath: Full path of the file name where the
+        objectname: object name is used to store the object
+        data: Numpy array that needs to be stored with object name in the file
+
+    Returns:
+
+    """
+    file_handle = h5py.File(filepath, 'w')
+    file_handle.create_dataset(objectname, data=data)
+    file_handle.close()
 
 
 if __name__ == '__main__':
