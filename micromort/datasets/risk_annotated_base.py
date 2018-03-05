@@ -11,10 +11,10 @@ import pymongo
 from tqdm import tqdm
 from pydash.collections import pluck
 from pydash.arrays import flatten_deep
-from nltk.tokenize.moses import MosesTokenizer, MosesDetokenizer
 from collections import Counter
 from operator import itemgetter
 
+import spacy
 
 FILE_PATHS = constants.PATHS
 DATA_DIR = FILE_PATHS['DATA_DIR']
@@ -24,7 +24,10 @@ LANG_NEWS_ARTICLES_PATH = os.path.join(OUTPUTS_DIR, 'lang_news_articles')
 
 class RiskAnnotatedBase:
     def __init__(self, use_headlines_only=True,
-                 max_words=3000):
+                 max_words=3000,
+                 lowercasing=True,
+                 lemmatization=True,
+                 stop_word_removal=True):
         self.MONGODB_URL = mongodb_config['onespace_host']
         self.MONGODB_PORT = mongodb_config['port']
         self.DB = mongodb_config['db']
@@ -37,9 +40,12 @@ class RiskAnnotatedBase:
             'straitstimes_labeling_collection']
         self.use_headlines_only = use_headlines_only
         self.max_words = max_words
-        # Get the moses tokenizer instance
-        self.tokenizer = MosesTokenizer()
-        self.detokenizer = MosesDetokenizer()
+        self.lowercasing = lowercasing
+        self.lemmatization = lemmatization
+        self.stop_word_removal = stop_word_removal
+
+        # load the spacy nlp
+        self.spacy_nlp = spacy.load('en')
 
         self.mongo_client = pymongo.MongoClient(self.MONGODB_URL, self.MONGODB_PORT)
         self.db = self.mongo_client[self.DB]
@@ -59,7 +65,7 @@ class RiskAnnotatedBase:
 
         # tokenize the text
         self.tokenized_article_texts, self.tokenized_article_headlines = \
-            self.tokenize()
+            self.pre_process()
 
         # build the vocab
         self.words_to_idx = self.build_vocab()
@@ -67,7 +73,6 @@ class RiskAnnotatedBase:
 
         # Get the label information for all the data
         self.risk_labels, self.sentiment_labels = self.get_labels()
-
 
         self.labels = self.get_labels()
 
@@ -197,7 +202,7 @@ class RiskAnnotatedBase:
 
         return words_to_idx
 
-    def tokenize(self):
+    def pre_process(self):
 
         news_articles_tokens_filename = os.path.join(LANG_NEWS_ARTICLES_PATH,
                                                      'news_articles.tokens')
@@ -209,18 +214,20 @@ class RiskAnnotatedBase:
                 or not os.path.isfile(news_headlines_tokens_filename):
 
             article_texts = pluck(self.annotated_data, 'article_text')
-            tokenized_article_texts = [self.tokenizer.tokenize(article_text)
-                                       for article_text in tqdm(article_texts,
-                                                                total=len(article_texts),
-                                                                desc='Tokenizing ' \
-                                                                     'article texts')]
+
+            tokenized_article_texts = [self.tokenize(self.spacy_nlp(article_text)) for
+                                       article_text in tqdm
+                                       (article_texts, total=len(article_texts),
+                                        desc="Pre Processing the article texts")]
 
             article_headlines = pluck(self.annotated_data, 'article_headline')
-            tokenized_article_headlines = [self.tokenizer.tokenize(article_headline)
-                                           for article_headline in tqdm(
-                    article_headlines, total=len(article_headlines), desc='Tokenizing '
-                                                                          'article '
-                                                                          'headlines')]
+
+            tokenized_article_headlines = [self.tokenize(self.spacy_nlp(article_headline))
+                                           for article_headline
+                                           in tqdm(article_headlines,
+                                                   total=len(article_headlines),
+                                                   desc="Pre "
+                                                        "Processing the article headlines")]
 
             save_pickle(tokenized_article_texts, news_articles_tokens_filename)
             save_pickle(tokenized_article_headlines, news_headlines_tokens_filename)
@@ -240,6 +247,22 @@ class RiskAnnotatedBase:
         sentiment_labels = pluck(self.annotated_data, 'sentiment_category')
 
         return risk_labels, sentiment_labels
+
+    def tokenize(self, spacy_doc):
+        tokens = []
+        for token in spacy_doc:
+            if self.stop_word_removal and token.is_stop:
+                continue
+            if self.lemmatization:
+                token_mod = token.lemma_
+            else:
+                token_mod = token.text
+            if self.lowercasing:
+                token_mod = token_mod.lower()
+
+            tokens.append(token_mod)
+
+        return tokens
 
 
 if __name__ == '__main__':
