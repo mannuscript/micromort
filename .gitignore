@@ -3,3 +3,4 @@
 virtualenv/
 micromort/data/
 .idea
+.ipynb_checkpoints/
