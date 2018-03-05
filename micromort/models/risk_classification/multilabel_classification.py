@@ -6,7 +6,8 @@ from progressbar import ProgressBar, Bar, Percentage
 from micromort.models.classify_base_model import *
 from micromort.utils.evaluation_measures_multilabel_classification import *
 from micromort.utils.general_utils import load_pickle, save_pickle
-from micromort.utils.general_utils import write_array_to_hdf_file, read_array_from_hdf_file
+from micromort.utils.general_utils import write_array_to_hdf_file, \
+    read_array_from_hdf_file
 from micromort.utils.language_utils import thresholding
 import numpy as np
 
@@ -44,9 +45,10 @@ import numpy as np
 """
 
 
-class CoarseAspectClassification(ClassifyBaseModel):
+class FastTextMultiLabelClassifier(ClassifyBaseModel):
     def __init__(self, train_features=None, train_labels=None, validation_features=None,
-                 validation_labels=None, config=None, config_file=None, load_model_from_file=False):
+                 validation_labels=None, config=None, config_file=None,
+                 load_model_from_file=False):
         """
         :param train_features: type:ndarray
                                shape: N * T
@@ -124,11 +126,11 @@ class CoarseAspectClassification(ClassifyBaseModel):
         if not load_model_from_file:
             save_pickle(config, './coarse_aspect_config.pkl')
             self.initialize_from_config(config)
-            super(CoarseAspectClassification, self).__init__(train_features,
-                                                             train_labels,
-                                                             validation_features,
-                                                             validation_labels,
-                                                             config)
+            super(FastTextMultiLabelClassifier, self).__init__(train_features,
+                                                               train_labels,
+                                                               validation_features,
+                                                               validation_labels,
+                                                               config)
             self.add_placeholder()
             self.initialize_parameters()
             self.logits = self.calculate_scores()
@@ -136,9 +138,9 @@ class CoarseAspectClassification(ClassifyBaseModel):
             self.train_op = self.add_optimiser()
             self.accuracy_op, self.accuracy_summary = self.calculate_accuracy()
             self.merged = self.add_summaries_operation()
-            self.summary_writer = tf.train.SummaryWriter(self.log_folder)
-            self.train_summary_writer = tf.train.SummaryWriter(self.train_log_folder)
-            self.test_summary_writer = tf.train.SummaryWriter(self.test_log_folder)
+            self.summary_writer = tf.summary.FileWriter(self.log_folder)
+            self.train_summary_writer = tf.summary.FileWriter(self.train_log_folder)
+            self.test_summary_writer = tf.summary.FileWriter(self.test_log_folder)
             self.saver = tf.train.Saver()
 
     def initialize_from_config(self, config):
@@ -164,10 +166,12 @@ class CoarseAspectClassification(ClassifyBaseModel):
     def add_loss(self):
         with tf.name_scope("Loss") as scope:
             if self.isMultiLabel:
-                loss = tf.nn.sigmoid_cross_entropy_with_logits(self.logits, self.y)
+                loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=self.logits,
+                                                               labels=self.y)
                 loss = tf.reduce_mean(tf.reduce_sum(loss, reduction_indices=[1]))
             else:
-                loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(self.logits, self.y))
+                loss = tf.reduce_mean(
+                    tf.nn.softmax_cross_entropy_with_logits(self.logits, self.y))
 
             reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
             loss += sum(reg_losses)
@@ -200,7 +204,7 @@ class CoarseAspectClassification(ClassifyBaseModel):
             return train_op
 
     def add_summaries_operation(self):
-        return tf.merge_summary([self.loss_summary, self.accuracy_summary])
+        return tf.summary.merge([self.loss_summary, self.accuracy_summary])
 
     def calculate_accuracy(self):
         with tf.name_scope("accuracy") as scope:
@@ -214,7 +218,7 @@ class CoarseAspectClassification(ClassifyBaseModel):
                 scores = tf.nn.sigmoid(self.logits)
                 # Have to calculate the one error for the scores here
                 error = tf.py_func(one_error, [scores, self.y], [tf.float64])[0]
-                accuracy = tf.sub(tf.constant(1.0, dtype=tf.float64), error)
+                accuracy = tf.subtract(tf.constant(1.0, dtype=tf.float64), error)
             accuracy_summary = tf.summary.scalar("accuracy", accuracy)
         return accuracy, accuracy_summary
 
@@ -257,13 +261,16 @@ class CoarseAspectClassification(ClassifyBaseModel):
         with tf.name_scope("Embedding_weights") as scope:
             self.W_embed = tf.get_variable("W_embed", shape=[self.vocab_size,
                                                              self.embedding_dimension],
-                                           initializer=tf.contrib.layers.xavier_initializer(seed=1729))
+                                           initializer=tf.contrib.layers.xavier_initializer(
+                                               seed=1729))
 
         with tf.name_scope("Linear_classifier_weights") as scope:
             self.W = tf.get_variable("W", shape=[self.embedding_dimension,
                                                  self.num_classes],
-                                     initializer=tf.contrib.layers.xavier_initializer(seed=1729),
-                                     regularizer=tf.contrib.layers.l2_regularizer(self.reg))
+                                     initializer=tf.contrib.layers.xavier_initializer(
+                                         seed=1729),
+                                     regularizer=tf.contrib.layers.l2_regularizer(
+                                         self.reg))
             self.b = tf.get_variable("b", shape=[self.num_classes],
                                      initializer=tf.constant_initializer(0.0))
 
@@ -346,7 +353,8 @@ class CoarseAspectClassification(ClassifyBaseModel):
             ma_fscores = macro_fscore(predicted_labels, test_labels)
 
             # semeval_2016 fscores
-            semeval_p, semeval_r, semeval_f = semeval_measures(predicted_labels, test_labels)
+            semeval_p, semeval_r, semeval_f = semeval_measures(predicted_labels,
+                                                               test_labels)
 
             return (one_err, coverage_, ap, mi_p, mi_r, mi_fscore, ma_p, ma_r,
                     ma_fscores, semeval_p, semeval_r, semeval_f)
@@ -368,7 +376,8 @@ class CoarseAspectClassification(ClassifyBaseModel):
                                  maxval=total_iterations).start()
                 average_loss = 0.0  # average loss for the epoch
                 # start of the iterations of the epoch
-                for iteration, (train_data, train_labels) in enumerate(self.get_batch(self.batch_size)):
+                for iteration, (train_data, train_labels) in enumerate(
+                        self.get_batch(self.batch_size)):
                     _, loss_summary, loss = self.session.run(
                         [self.train_op, self.merged, self.loss],
                         feed_dict={self.X: train_data, self.y: train_labels})
@@ -386,15 +395,19 @@ class CoarseAspectClassification(ClassifyBaseModel):
 
                 training_summary, training_accuracy = self.session.run([self.merged,
                                                                         self.accuracy_op],
-                                                                       feed_dict={self.X: self.train_data,
-                                                                                  self.y: self.train_labels})
-                print("Training accuracy at the end of epoch %d is %f" % (i + 1, training_accuracy))
+                                                                       feed_dict={
+                                                                           self.X: self.train_data,
+                                                                           self.y: self.train_labels})
+                print("Training accuracy at the end of epoch %d is %f" % (
+                i + 1, training_accuracy))
 
                 validation_summary, validation_accuracy = self.session.run([self.merged,
                                                                             self.accuracy_op],
-                                                                           feed_dict={self.X: self.validation_data,
-                                                                                      self.y: self.validation_labels})
-                print("Validation accuracy at the end of epoch %d is %f" % (i + 1, validation_accuracy))
+                                                                           feed_dict={
+                                                                               self.X: self.validation_data,
+                                                                               self.y: self.validation_labels})
+                print("Validation accuracy at the end of epoch %d is %f" % (
+                i + 1, validation_accuracy))
 
                 self.train_summary_writer.add_summary(training_summary, i)
                 self.test_summary_writer.add_summary(validation_summary, i)
@@ -436,6 +449,12 @@ class CoarseAspectClassification(ClassifyBaseModel):
                  shape: Nc+1, 1
                  Nc - Number of classes
                  +1 for the biases
+
+
+
+
+
+
         """
 
         # Use this only when doing the multi-label classification
@@ -462,7 +481,8 @@ class CoarseAspectClassification(ClassifyBaseModel):
         new_saver.restore(self.session, self.models_folder +
                           'coarse_aspect_classification_weights.ckpt')
         all_vars = tf.trainable_variables()
-        self.W_embed = [variable for variable in all_vars if variable.name == 'W_embed:0'][0]
+        self.W_embed = \
+        [variable for variable in all_vars if variable.name == 'W_embed:0'][0]
         self.W = [variable for variable in all_vars if variable.name == 'W:0'][0]
         self.b = [variable for variable in all_vars if variable.name == "b:0"][0]
         self.WeightsThreshold = read_array_from_hdf_file(self.models_folder +

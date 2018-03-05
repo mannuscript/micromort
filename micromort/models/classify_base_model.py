@@ -117,7 +117,8 @@ class ClassifyBaseModel(object):
         assert np.isnan(np.sum(train_labels)) == False
         return train_data, train_labels
 
-    def get_placeholder(self, size, dtype=tf.float32):
+    @staticmethod
+    def get_placeholder(size, dtype=tf.float32):
         """
         SHOULD NOT BE CHANGED IN THE INHERITED CLASS
         Args:
@@ -158,9 +159,6 @@ class ClassifyBaseModel(object):
         """
 
         Args:
-            session: The tensor flow session on which the various operations can be run
-            in parallel
-
         Returns:
         """
         raise NotImplementedError

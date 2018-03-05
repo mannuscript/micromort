@@ -1,0 +1,98 @@
+from micromort.datasets.risk_dataset import RiskDataset
+from tqdm import tqdm
+import os
+import micromort.constants as constants
+import numpy as np
+from micromort.models.risk_classification.multilabel_classification import \
+    FastTextMultiLabelClassifier
+
+FILE_PATHS = constants.PATHS
+OUTPUTS_DIR = FILE_PATHS['OUTPUTS_DIR']
+
+if __name__ == '__main__':
+    risk_train_dataset = RiskDataset()
+    risk_test_dataset = RiskDataset(train=False)
+
+    ###########################################################################
+    #                   SETUP THE HYPER-PARAMETERS                            #
+    ###########################################################################
+    VOCAB_SIZE = risk_train_dataset.get_vocab_size()
+    LEARNING_RATE = 1e-03
+    NUM_EPOCHS = 10
+    LEARNING_TYPE = 'adam'
+    BATCH_SIZE = 64
+    REG = 1e-01
+    NUM_HIDDEN = 100
+    EMBEDDING_DIMENSION = 150
+    MULTILABEL = True
+    LOGS_FOLDER = os.path.join(OUTPUTS_DIR, 'fastext_risk_classification', 'logs')
+    TEST_LOGS_FOLDER = os.path.join(OUTPUTS_DIR, 'fastext_risk_classification', 'logs',
+                                    'train')
+    TRAIN_LOGS_FOLDER = os.path.join(OUTPUTS_DIR, 'fastext_risk_classification',
+                                     'logs', 'test')
+    MODELS_FOLDER = os.path.join(OUTPUTS_DIR, 'fastext_risk_classification', 'models')
+    NUM_TRAIN = len(risk_train_dataset)
+    NUM_TEST = len(risk_test_dataset)
+
+    ###########################################################################
+    #                   PREPARE THE DATASET                          #
+    ###########################################################################
+    train_data = []
+    train_labels = []
+    for i in tqdm(range(NUM_TRAIN), total=NUM_TRAIN, desc="Collecting the training data"):
+        sentence, label = risk_train_dataset[i]
+        train_data.append(sentence)
+        train_labels.append(label)
+
+    test_data = []
+    test_labels = []
+    for j in range(NUM_TEST):
+        sentence, label = risk_test_dataset[j]
+        test_data.append(sentence)
+        test_labels.append(label)
+
+    train_data = np.array(train_data)
+    train_labels = np.array(train_labels)
+    test_data = np.array(test_data)
+    test_labels = np.array(test_labels)
+
+    ###########################################################################
+    #                  CONFIG AND RIG THE CLASSIFIER                          #
+    ###########################################################################
+    config = dict(learning_rate=LEARNING_RATE,
+                  learning_type=LEARNING_TYPE,
+                  num_epochs=NUM_EPOCHS,
+                  batch_size=BATCH_SIZE,
+                  reg=REG,
+                  num_hidden=NUM_HIDDEN,
+                  embedding_dimension=EMBEDDING_DIMENSION,
+                  vocab_size=VOCAB_SIZE,
+                  multilabel=MULTILABEL,
+                  log_folder=LOGS_FOLDER,
+                  test_log_folder=TEST_LOGS_FOLDER,
+                  train_log_folder=TRAIN_LOGS_FOLDER,
+                  models_folder=MODELS_FOLDER
+                  )
+
+    classifier = FastTextMultiLabelClassifier(train_data, train_labels,
+                                              test_data, test_labels,
+                                              config)
+
+    classifier.train(print_every=10, log_summary=True)
+
+    (one_err, coverage_, ap, mi_p, mi_r, mi_fscore, ma_p, ma_r,
+     ma_fscores, _, _, _) = classifier.test(test_data,
+                                            test_labels)
+
+    scores = {'one_err': one_err,
+              'coverage': coverage_,
+              'average_precision': ap,
+              'micro_precision': mi_p,
+              'micro recall': mi_r,
+              'micro fscore': mi_fscore,
+              'macro precision': ma_p,
+              'macro recall': ma_r,
+              'macro fscore': ma_fscores}
+    print('*' * 80)
+    print('SCORES MULTILABEL PREDICT {0}'.format(scores))
+    print('*' * 80)
