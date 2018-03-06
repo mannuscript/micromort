@@ -4,4 +4,5 @@ virtualenv/
 micromort/data/
 .idea
 micromort/outputs/fastext_risk_classification/logs
+.ipynb_checkpoints/
 
