@@ -10,20 +10,24 @@ FILE_PATHS = constants.PATHS
 OUTPUTS_DIR = FILE_PATHS['OUTPUTS_DIR']
 
 if __name__ == '__main__':
-    risk_train_dataset = RiskDataset()
-    risk_test_dataset = RiskDataset(train=False)
+
+    MAX_SENTENCE_LENGTH = 200
+    risk_train_dataset = RiskDataset(use_headlines_only=False,
+                                     max_sentence_length=MAX_SENTENCE_LENGTH)
+    risk_test_dataset = RiskDataset(train=False, use_headlines_only=False,
+                                    max_sentence_length=MAX_SENTENCE_LENGTH)
 
     ###########################################################################
     #                   SETUP THE HYPER-PARAMETERS                            #
     ###########################################################################
     VOCAB_SIZE = risk_train_dataset.get_vocab_size()
     LEARNING_RATE = 1e-03
-    NUM_EPOCHS = 10
+    NUM_EPOCHS = 80
     LEARNING_TYPE = 'adam'
     BATCH_SIZE = 64
     REG = 1e-01
-    NUM_HIDDEN = 100
-    EMBEDDING_DIMENSION = 150
+    NUM_HIDDEN = 1024
+    EMBEDDING_DIMENSION = 300
     MULTILABEL = True
     LOGS_FOLDER = os.path.join(OUTPUTS_DIR, 'fastext_risk_classification', 'logs')
     TEST_LOGS_FOLDER = os.path.join(OUTPUTS_DIR, 'fastext_risk_classification', 'logs',
@@ -96,3 +100,10 @@ if __name__ == '__main__':
     print('*' * 80)
     print('SCORES MULTILABEL PREDICT {0}'.format(scores))
     print('*' * 80)
+
+    class_labels = ['health', 'safety_security', 'environment',
+                    'social_relations', 'meaning_in_life', 'achievement',
+                    'economics', 'politics', 'not_applicable']
+
+    class_accuracy_report = classifier.get_report(test_data, test_labels, class_labels)
+    print(class_accuracy_report)

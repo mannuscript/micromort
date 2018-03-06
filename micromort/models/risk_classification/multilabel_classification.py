@@ -10,6 +10,7 @@ from micromort.utils.general_utils import write_array_to_hdf_file, \
     read_array_from_hdf_file
 from micromort.utils.language_utils import thresholding
 import numpy as np
+from sklearn.metrics import precision_score, recall_score, f1_score
 
 """
     This is meant to do multi label classification
@@ -488,3 +489,47 @@ class FastTextMultiLabelClassifier(ClassifyBaseModel):
         self.WeightsThreshold = read_array_from_hdf_file(self.models_folder +
                                                          "weightsThreshold.h5",
                                                          'weightsThreshold')
+
+    def get_report(self, test_features, test_labels,
+                   class_labels):
+        """
+
+                Args:
+                    test_features: type: ndarray
+                                   shape: N * T
+                                   N - Number of training examples
+                                   T - Number of tokens in each sentence
+                    test_labels: type: N * Nc
+                                 N - number of training examples
+                                 Nc - Number of classes
+                    class_labels: shape: Nc
+                                Nc - Number of classes
+                                A string array indicating the labels
+
+                Returns: Report
+                """
+        if not self.isMultiLabel:
+            return self.session.run([self.accuracy_op],
+                                    feed_dict={self.X: test_features,
+                                               self.y: test_labels})
+        else:
+            # If the scores are greater than the corresponding threshold
+            # then they are set to 1
+            scores, predicted_labels = self.multilabel_predict(test_features)
+
+            # For every class get the precision recall and f_score
+            _, num_classes = scores.shape
+
+        class_accuracy_report = {}
+        for idx in range(num_classes):
+            scores_i, predicted_labels_i = scores[:, idx], predicted_labels[:, idx]
+            test_labels_i = test_labels[:, idx]
+            precision_i = precision_score(test_labels_i, predicted_labels_i)
+            recall_i = recall_score(test_labels_i, predicted_labels_i)
+            f1_i = f1_score(test_labels_i, predicted_labels_i)
+            class_accuracy_report[class_labels[idx]] = [precision_i, recall_i, f1_i]
+
+        return class_accuracy_report
+
+
+
