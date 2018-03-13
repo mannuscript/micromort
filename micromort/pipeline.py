@@ -2,10 +2,11 @@ import os
 import datetime
 from bson.objectid import ObjectId
 
-from micromort.share_metrics.shares_getter import SharesGetter, NewsFeedCrawler
+from micromort.share_metrics.shares_getter import SharesGetter
+from micromort.share_metrics.newsfeedcrawler import NewsFeedCrawler
 from micromort.scrapers.newspaper_scraper import Newspaper_scraper
-
-
+from micromort.utils.logger import logger
+from micromort.data_stores.mongodb import getConnection
 
 class Pipeline:
     def __init__(self):
@@ -13,6 +14,7 @@ class Pipeline:
         self.news_feed_crawler = NewsFeedCrawler(file_path)
         self.share_getter = SharesGetter()
         self.scraper = Newspaper_scraper()
+        self.mongoClient = getConnection("rss", "articles")
         pass
 
     def getUrlsToCrawl(self, d=1):
@@ -24,7 +26,7 @@ class Pipeline:
         to_id = ObjectId.from_datetime(to_date)
 
         urls = []
-        print "Getting urls from ", from_date, " to ", to_date
+        logger.info("Getting urls from " + str(from_date) + " to " + str(to_date))
         articles = self.mongoClient.find({"_id": {"$gt": from_id, "$lt": to_id}})
         for article in articles:
             urls.append(article["link"])

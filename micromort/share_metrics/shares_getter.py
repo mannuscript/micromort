@@ -8,7 +8,7 @@ import datetime
 import json
 from bson.objectid import ObjectId
 
-from micromort.data_stores.mongodb import mongo_collection_articles
+from micromort.data_stores.mongodb import getConnection
 from micromort.data_stores.mysql import db, cursor
 from micromort.utils.logger import logger
 from micromort.resources.configs.share_metricconfig import share_metricconfig
@@ -22,7 +22,7 @@ def batch(iterable, n=1):
 
 class SharesGetter:
     def __init__(self):
-        self.mongoClient = mongo_collection_articles
+        self.mongoClient = getConnection("rss", "articles")
         self.db = db
         self.cursor = cursor
 
@@ -35,7 +35,7 @@ class SharesGetter:
         to_id = ObjectId.from_datetime(to_date)
 
         urls = []
-        print "Getting urls from ", from_date, " to ", to_date
+        logger.info("Getting urls from ", from_date, " to ", to_date)
         articles = self.mongoClient.find({"_id": {"$gt": from_id, "$lt": to_id}})
         for article in articles:
             urls.append(article["link"])
@@ -123,11 +123,11 @@ class SharesGetter:
                 self.dumpIntoMysql(url, count,  countType)
 
                 
-            for url in url_chunk:
-                # Get linkedin counts
-                linkedIn_count = self.get_linkedIn_shares(url)
-                logger.info("linkedin shares for url: " + url + " is: " + str(linkedIn_count))
-                self.dumpIntoMysql(url, linkedIn_count,  "LinkedIn")
+            # for url in url_chunk:
+            #     # Get linkedin counts
+            #     linkedIn_count = self.get_linkedIn_shares(url)
+            #     logger.info("linkedin shares for url: " + url + " is: " + str(linkedIn_count))
+            #     self.dumpIntoMysql(url, linkedIn_count,  "LinkedIn")
 
     def dumpIntoMysql(self, url, count, socialMediaChannel):
         # Pain of normalization: run 2 insert query:

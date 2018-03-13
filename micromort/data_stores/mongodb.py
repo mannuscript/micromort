@@ -16,4 +16,4 @@ def getConnection(db,  collection):
 
 # Create a unique index on link, as rss feed will be fetching the same
 # url again and again.
-mongo_collection_articles.create_index("link", unique=True)
+# mongo_collection_articles.create_index("link", unique=True)
