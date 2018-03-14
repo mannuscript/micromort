@@ -45,7 +45,7 @@ pip install -r requirements.txt
  2. You need a database `micromort` in mysql.
 For creating the schema:
 ```
-mysql -uroot -p micromort < /resources/DB/mysql_schema.sql
+mysql -uroot -p micromort < ./resources/DB/mysql_schema.sql
 ``` 
 
  3. Add path to your bash profile.

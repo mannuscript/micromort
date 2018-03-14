@@ -8,7 +8,7 @@ import datetime
 import json
 from bson.objectid import ObjectId
 
-from micromort.data_stores.mongodb import mongo_collection_articles
+from micromort.data_stores.mongodb import getConnection
 from micromort.data_stores.mysql import db, cursor
 from micromort.utils.logger import logger
 from micromort.resources.configs.share_metricconfig import share_metricconfig
@@ -22,11 +22,11 @@ def batch(iterable, n=1):
 
 class SharesGetter:
     def __init__(self):
-        self.mongoClient = mongo_collection_articles
+        self.mongoClient = getConnection("rss", "articles")
         self.db = db
         self.cursor = cursor
 
-    def __getUrlsToCrawl(self, d=-1):
+    def getUrlsToCrawl(self, d=1):
         now = datetime.datetime.now()
         today = datetime.datetime(now.year, now.month, now.day)
         from_date = today + datetime.timedelta(days=-d)
@@ -35,6 +35,7 @@ class SharesGetter:
         to_id = ObjectId.from_datetime(to_date)
 
         urls = []
+        logger.info("Getting urls from ", from_date, " to ", to_date)
         articles = self.mongoClient.find({"_id": {"$gt": from_id, "$lt": to_id}})
         for article in articles:
             urls.append(article["link"])
@@ -73,11 +74,11 @@ class SharesGetter:
                 respJsons = json.loads(res.text)
                 result = []
                 for url in respJsons:
-                    result.append( {
+                    result.append({
                         "url" : url,
                         "type" :  "Facebook_comment_count",
                         "count" :  respJsons[url]["engagement"]["comment_count"]
-                    } )
+                    })
                     result.append( {
                         "url" : url,
                         "type" : "Facebook_share_count", 
@@ -102,8 +103,8 @@ class SharesGetter:
             1: yesterday
             and so on
     """
-    def main(self, day):
-        urls = self.__getUrlsToCrawl(day)
+    def main(self, urls):
+        #urls = self.getUrlsToCrawl(day)
 
         logger.info(" Main function called, going to work on " \
                     + str(len(urls)) + " url(s)")
@@ -122,18 +123,18 @@ class SharesGetter:
                 self.dumpIntoMysql(url, count,  countType)
 
                 
-            for url in url_chunk:
-                # Get linkedin counts
-                linkedIn_count = self.get_linkedIn_shares(url)
-                logger.info("linkedin shares for url: " + url + " is: " + str(linkedIn_count))
-                self.dumpIntoMysql(url, linkedIn_count,  "LinkedIn")
+            # for url in url_chunk:
+            #     # Get linkedin counts
+            #     linkedIn_count = self.get_linkedIn_shares(url)
+            #     logger.info("linkedin shares for url: " + url + " is: " + str(linkedIn_count))
+            #     self.dumpIntoMysql(url, linkedIn_count,  "LinkedIn")
 
     def dumpIntoMysql(self, url, count, socialMediaChannel):
         # Pain of normalization: run 2 insert query:
         # insert into article_urls and get the insert id
         try:
             """
-                Ok, next few steps are going to be a little confusing... 
+                Ok, next few steps are going to be little confusing... 
                 grab some popcorn and sit tight!
 
                 We first do an "insert ignore" into article_urls (url field has unique index 
@@ -146,7 +147,7 @@ class SharesGetter:
                 Bingo! just a select in such cases to get the url_id.
 
                 then:
-                With socialMediachannel, counts, urlId: Do a insert on duplicate update in 
+                With socialMediachannel, counts, urlId: Do an "insert, on duplicate update" in 
                 article_social_media_shares table, if the effected rows are not zero (either 
                 new entry of change in th counts) create a new entry in 
                 article_social_media_shares_history
@@ -167,7 +168,7 @@ class SharesGetter:
             
             if effectedRows and count != -1:
                 self.cursor.execute(
-                    """INSERT INTO  article_social_media_shares_history(url_id,  
+                    """INSERT IGNORE INTO  article_social_media_shares_history(url_id,  
                         social_media_channel, counts) values(%s, %s, %s)
                     """,  [urlId, socialMediaChannel, count])
 
@@ -180,7 +181,10 @@ if __name__ == "__main__":
     #run them for last 30 days (including today)! 30 ? :O (This has to be stopped)
     #for i in range(0,30):
     #    ob.main(i)
-    ob.main(0)
+    ob.main(1)
+    #urls = ob.getUrlsToCrawl(1)
+    #for url in urls:
+    #    print url
     #url = " http://www.straitstimes.com/tech/audio/beats-studio3-wireless-review-a-great-pair-of-headphones-for-ios-devices"
     # counter = 0;
     # while(True):

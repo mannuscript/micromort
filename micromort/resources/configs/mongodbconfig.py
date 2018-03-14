@@ -14,9 +14,37 @@ mongodb_config = {
     'businesstimes_labeling_collection': 'businesstimes_labeling',
     'asiaone_labeling_collection': 'asiaone_labeling',
     'dbs': {
-        'forums': {
-            "sgtalk": "sgtalk",
-            "hdwzone": 'hdwzone'
+        'forums' :{
+            "sgtalk":"sgtalk",
+            "hardwarezone":'hardwarezone'
+        },
+        "rss" : {
+            "db" : "rss",
+            "collection" : "articles"
+        }, 
+
+        "news_websites"  : {
+            "asiaone" : {
+                "db" : "articles",
+                "collection" : "asiaone"
+            },
+
+            "channelnews" : {
+                "db" : "articles",
+                "collection" : "channelnews"
+            },
+
+            "businesstimes" : {
+                "db" : "articles",
+                "collection" : "businesstimes"
+            },
+
+            "straitstimes" : {
+                "db" : "articles",
+                "collection" : "straitstimes"
+            }
+           
+
         }
     },
     'onespace_host': '172.29.33.45'
