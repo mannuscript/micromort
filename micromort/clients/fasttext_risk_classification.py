@@ -107,3 +107,44 @@ if __name__ == '__main__':
 
     class_accuracy_report = classifier.get_report(test_data, test_labels, class_labels)
     print(class_accuracy_report)
+
+    # get the examples that have false positives for a given class name
+    false_positive_examples = {}
+
+    for class_label in class_labels:
+        false_positive_idxs = classifier.get_false_positive_examples(test_data,
+                                                                     test_labels,
+                                                                     class_label)
+
+        false_positive_examples[class_label] = []
+        for idx in false_positive_idxs:
+            false_positive_examples[class_label].append(
+                (risk_test_dataset.test_annotated_data[idx]
+                 ['article_headline'],
+                 risk_test_dataset.test_annotated_data[idx]['article_id']))
+
+        print('*' * 80)
+        print("False positive for class {0}".format(class_label))
+        print('*' * 80)
+        print(false_positive_examples[class_label])
+
+    false_negative_examples = {}
+    for class_label in class_labels:
+        false_negative_idxs = classifier.get_false_negative_examples(test_data,
+                                                                     test_labels,
+                                                                     class_label)
+        false_negative_examples[class_label] = []
+        for idx in false_negative_idxs:
+            false_negative_examples[class_label].append(
+                (risk_test_dataset.test_annotated_data[idx]
+                 ['article_headline'],
+                 risk_test_dataset.test_annotated_data[idx]['article_id']))
+
+        print('*' * 80)
+        print("False negative for class {0}".format(class_label))
+        print('*' * 80)
+        print(false_negative_examples[class_label])
+
+
+
+

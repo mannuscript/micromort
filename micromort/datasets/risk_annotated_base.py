@@ -13,8 +13,8 @@ from pydash.collections import pluck
 from pydash.arrays import flatten_deep
 from collections import Counter
 from operator import itemgetter
-
 import spacy
+from pydash.collections import find
 
 FILE_PATHS = constants.PATHS
 DATA_DIR = FILE_PATHS['DATA_DIR']
@@ -123,7 +123,8 @@ class RiskAnnotatedBase:
                         'risk_category': risk_category,
                         'sentiment_category': sentiment_category,
                         'article_headline': article_headline,
-                        'article_text': article_text
+                        'article_text': article_text,
+                        'article_url': article_url
                     })
 
             save_pickle(data, data_pickle_file)
@@ -264,6 +265,12 @@ class RiskAnnotatedBase:
 
         return tokens
 
+    def get_data(self, article_id):
+        data = find(self.annotated_data, {'article_id': article_id})
+        return data
+
 
 if __name__ == '__main__':
     risk_dataset = RiskAnnotatedBase()
+    article = risk_dataset.get_data('2262')
+    print(article)

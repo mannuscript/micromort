@@ -21,7 +21,7 @@ class RiskDataset(RiskAnnotatedBase):
          self.test_tokenized_article_texts), (self.train_tokenized_article_headlines,
                                               self.test_tokenized_article_headlines), \
         (self.train_risk_labels, self.test_risk_labels), (self.train_sentiment_labels,
-                                                self.test_sentiment_labels) = \
+                                                          self.test_sentiment_labels) = \
             self.get_train_test_split()
 
         # sanity checks
@@ -130,3 +130,4 @@ if __name__ == '__main__':
     sentence, label = risk_dataset[1]
     print(sentence)
     print(risk_dataset.indices_to_tokens(sentence))
+    print(risk_dataset.test_annotated_data[0])

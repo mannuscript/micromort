@@ -11,6 +11,7 @@ from micromort.utils.general_utils import write_array_to_hdf_file, \
 from micromort.utils.language_utils import thresholding
 import numpy as np
 from sklearn.metrics import precision_score, recall_score, f1_score
+import pandas as pd
 
 """
     This is meant to do multi label classification
@@ -400,7 +401,7 @@ class FastTextMultiLabelClassifier(ClassifyBaseModel):
                                                                            self.X: self.train_data,
                                                                            self.y: self.train_labels})
                 print("Training accuracy at the end of epoch %d is %f" % (
-                i + 1, training_accuracy))
+                    i + 1, training_accuracy))
 
                 validation_summary, validation_accuracy = self.session.run([self.merged,
                                                                             self.accuracy_op],
@@ -408,7 +409,7 @@ class FastTextMultiLabelClassifier(ClassifyBaseModel):
                                                                                self.X: self.validation_data,
                                                                                self.y: self.validation_labels})
                 print("Validation accuracy at the end of epoch %d is %f" % (
-                i + 1, validation_accuracy))
+                    i + 1, validation_accuracy))
 
                 self.train_summary_writer.add_summary(training_summary, i)
                 self.test_summary_writer.add_summary(validation_summary, i)
@@ -483,7 +484,7 @@ class FastTextMultiLabelClassifier(ClassifyBaseModel):
                           'coarse_aspect_classification_weights.ckpt')
         all_vars = tf.trainable_variables()
         self.W_embed = \
-        [variable for variable in all_vars if variable.name == 'W_embed:0'][0]
+            [variable for variable in all_vars if variable.name == 'W_embed:0'][0]
         self.W = [variable for variable in all_vars if variable.name == 'W:0'][0]
         self.b = [variable for variable in all_vars if variable.name == "b:0"][0]
         self.WeightsThreshold = read_array_from_hdf_file(self.models_folder +
@@ -531,5 +532,74 @@ class FastTextMultiLabelClassifier(ClassifyBaseModel):
 
         return class_accuracy_report
 
+    def get_false_positive_examples(self, test_features, test_labels, class_name,
+                                    n=5):
+        """
+        Gets n false positive examples for the given class_name
+        """
+        if not self.isMultiLabel:
+            return self.session.run([self.accuracy_op],
+                                    feed_dict={self.X: test_features,
+                                               self.y: test_labels})
+        else:
+            # If the scores are greater than the corresponding threshold
+            # then they are set to 1
+            scores, predicted_labels = self.multilabel_predict(test_features)
 
+            class_labels = np.array(['health', 'safety_security', 'environment',
+                                     'social_relations', 'meaning_in_life', 'achievement',
+                                     'economics', 'politics', 'not_applicable'])
 
+            try:
+                class_idx = np.where(class_labels == class_name)[0][0]
+            except IndexError:
+                raise ValueError("The classname has to be one of {0}".format(
+                    class_labels))
+
+            predicted_labels_class = predicted_labels[:, class_idx]
+            test_labels_class = test_labels[:, class_idx]
+
+            # get rows where test labels are 0
+            df = pd.DataFrame({'predicted': predicted_labels_class,
+                               'actual': test_labels_class})
+
+            indices = list(df[(df['actual'] == 0) & df['predicted'] == 1].index)
+
+            indices = indices[:n]
+
+            print(indices)
+            return indices
+
+    def get_false_negative_examples(self, test_features, test_labels, class_name,
+                                    n=5):
+        """
+               Gets n false positive examples for the given class_name
+               """
+        if not self.isMultiLabel:
+            return self.session.run([self.accuracy_op],
+                                    feed_dict={self.X: test_features,
+                                               self.y: test_labels})
+        else:
+            # If the scores are greater than the corresponding threshold
+            # then they are set to 1
+            scores, predicted_labels = self.multilabel_predict(test_features)
+
+            class_labels = np.array(['health', 'safety_security', 'environment',
+                                     'social_relations', 'meaning_in_life', 'achievement',
+                                     'economics', 'politics', 'not_applicable'])
+
+            try:
+                class_idx = np.where(class_labels == class_name)[0][0]
+            except IndexError:
+                raise ValueError("The classname has to be one of {0}".format(
+                    class_labels))
+
+            predicted_labels_class = predicted_labels[:, class_idx]
+            test_labels_class = test_labels[:, class_idx]
+
+            df = pd.DataFrame({'predicted': predicted_labels_class,
+                               'actual': test_labels_class})
+
+            indices = list(df[(df['actual'] == 1) & df['predicted'] == 0].index)
+            indices = indices[:n]
+            return indices

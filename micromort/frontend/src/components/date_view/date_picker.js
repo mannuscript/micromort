@@ -15,22 +15,35 @@ const styles = theme => ({
   },
 });
 
-function DatePickers(props) {
-  const { classes, label } = props;
+class  DatePickers extends React.Component{
+  constructor(props) {
+    super(props);
+    this.handleDate = this.handleDate.bind(this);
+  }
 
-  return (
-    <form className={classes.container} noValidate>
-      <TextField        
-        label={label}
-        type="date"
-        defaultValue="2017-05-24"
-        className={classes.textField}
-        InputLabelProps={{
-          shrink: true,
-        }}
-      />
-    </form>
-  );
+  render(){
+      const { classes, label, defaultValue } = this.props;
+
+      return (
+        <form className={classes.container} noValidate>
+          <TextField
+            label={label}
+            type="date"
+            defaultValue={defaultValue}
+            className={classes.textField}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            onChange={this.handleDate}
+          />
+        </form>
+      );
+  }
+
+  handleDate(event, date) {
+    this.props.onChange(event.target.value)
+  }
+
 }
 
 DatePickers.propTypes = {
