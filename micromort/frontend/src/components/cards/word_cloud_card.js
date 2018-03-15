@@ -8,6 +8,8 @@ import Share from 'material-ui-icons/Share';
 import WordCloudIcon from '../icons/word_cloud_icon';
 import { tagCloudStyles } from '../../configs/styles';
 import  CustomChip  from '../custom_chip'
+import filter from 'lodash/filter';
+import lodashmap from 'lodash/map';
 
 const data = [
   { text: 'Hey', value: 1000 },
@@ -25,24 +27,13 @@ const rotate = word => word.value % 360;
 class TagCloudCard extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-        chipData: [
-          { key: 0, label: 'Health', selected: true },
-          { key: 1, label: 'Safety', selected: false },
-          { key: 2, label: 'Environment', selected: false },
-          { key: 3, label: 'Social Relations', selected: false },
-          { key: 4, label: 'Meaning in Life', selected: false },
-          { key: 5, label: 'Achievements', selected: false },
-          { key: 6, label: 'Economics', selected: false },
-        ],
-        wordCloudData: data
-
-     };
-     this.onChipClick = this.onChipClick.bind(this);
+     this.handleChipClick = this.handleChipClick.bind(this);
 
   }
+
+
   render() {
-      const { classes } = this.props;
+      const { classes, chipData } = this.props;
       return (
         <div className={classes.container}>
           <Card>
@@ -69,7 +60,7 @@ class TagCloudCard extends React.Component {
             <CardContent>
               <div>
                 <WordCloud
-                  data={this.state.wordCloudData}
+                  data={this.props.wordCloudData}
                   fontSizeMapper={fontSizeMapper}
                   rotate={rotate}
                   width={450}
@@ -80,13 +71,13 @@ class TagCloudCard extends React.Component {
 
             <div className={classes.actions}>
               {
-                this.state.chipData.map(data => {
+                chipData.map(data => {
                   return (
                     <CustomChip
                       key={data.key}
                       text={data.label}
                       isSelected={data.selected}
-                      onClick={this.onChipClick}
+                      onClick={this.handleChipClick}
                       chipNumber={data.key}>
 
                     </CustomChip>
@@ -100,19 +91,20 @@ class TagCloudCard extends React.Component {
     );
   }
 
-  onChipClick(key){
-    var chipData = this.state.chipData.slice()
+  handleChipClick(key){
+    var chipData = this.props.chipData.slice();
+    const that = this;
     chipData.forEach(chipInfo =>{
       if (chipInfo.key === key) {
         chipData[key]["selected"] = !chipData[key]["selected"]
       }
     })
-    this.setState({
-      chipData: chipData
-    })
+
+    this.props.onChipClick(chipData)
 
     //Get the appropriate cloud data as well
   }
+
 }
 
 export default withStyles(tagCloudStyles)(TagCloudCard)

@@ -10,17 +10,19 @@ import ChartCard from '../cards/chart_card';
 import SocialMediaSection from '../cards/social_media_section';
 import ChartistGraph from 'react-chartist';
 import  data  from '../../configs/data';
-import  TagCloudCard from '../cards/word_cloud_card';
+// import  TagCloudCard from '../cards/word_cloud_card';
 import Button from 'material-ui/Button';
 import random from 'lodash/random';
 
 
+const barChartData = data.barChartData;
 const lineChartOptions = data.lineChartOptions;
 
 
 class DateView extends React.Component {
 
   constructor(props){
+    console.log('inside the constructor')
       super(props);
       // Get the current date and pass it to the datepicker
       var today = new Date();
@@ -71,8 +73,9 @@ class DateView extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchData()
+    this.fetchData();
   }
+
 
   render(){
     const { classes } = this.props
@@ -125,7 +128,6 @@ class DateView extends React.Component {
             <SocialMediaSection></SocialMediaSection>
           </Grid>
           <Grid item xs={12} sm={12} md={6}>
-            <TagCloudCard></TagCloudCard>
           </Grid>
         </Grid>
 
@@ -133,19 +135,25 @@ class DateView extends React.Component {
     )
   }
 
+
   setFromDate(date) {
+    console.log('setting from date to ', date)
     this.setState({
       'from_date': date
     })
   }
 
+
   setToDate(date) {
+    console.log('setting to date to', date);
     this.setState({
       'to_date': date
     })
   }
 
+
   fetchData(){
+
     const histApiUrl = this.histApiUrl + this.state.from_date + '/' + this.state.to_date
     fetch(histApiUrl)
     .then(response => response.json())
@@ -179,10 +187,11 @@ class DateView extends React.Component {
         num_social_media_category.push(random(0, 100))
       })
 
-
       this.setState({
         'news_category_bar_chart_data': {
-          'labels': this.categories,
+          'labels': ['Health', 'Safety/Security', 'Environment',
+                        'Social Relations', 'Life Meaning', 'Achievement',
+                        'Economics', 'Politics'],
           'series': [num_articles_category, num_social_media_category]
         }
       })
