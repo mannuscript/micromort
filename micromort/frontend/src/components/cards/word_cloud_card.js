@@ -28,7 +28,6 @@ class TagCloudCard extends React.Component {
   constructor(props) {
     super(props);
      this.handleChipClick = this.handleChipClick.bind(this);
-
   }
 
 

@@ -175,7 +175,7 @@ module.exports = function(server) {
   function(req, res, next){
     const from_date = req.params.from_date;
     const to_date = req.params.to_date;
-    const category = [req.params.category];
+    const category = split(req.params.category, ',');
     console.log(category)
 
     //check whether dates have been sent in the desired format
@@ -200,7 +200,7 @@ module.exports = function(server) {
       res.send(error)
       next()
     }
-this
+
     // Query the database for the appropriate documents
     from_date_object = new Date(from_date);
     to_date_object = new Date(to_date)
@@ -214,6 +214,7 @@ this
          '$in': category
        }
     }, function(error, docs){
+        console.log('number of documents retrieved', docs.length)
         var article_texts = lodashmap(docs, partialRight(pick, 'article_text'));
         article_texts = lodashmap(article_texts, function(article_text){
           return article_text['article_text']
@@ -221,13 +222,14 @@ this
         article_texts = join(article_texts, '');
         words =  split(article_texts, ' ')
 
+
         // remove the stopwords
         // it it taking a longgggggg time
         // words = filter(words, function(word){ return includes(stopwords, word)})
 
         counts = countBy(words)
         counts = sortBy(toPairs(counts), function(tuple){return tuple[1]}).reverse();
-        counts = take(counts, 50)
+        counts = take(counts, 100)
 
         counts = counts.map(function(word_count_tuple){
           return {'text': word_count_tuple[0], 'value': word_count_tuple[1]}

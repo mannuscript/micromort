@@ -10,9 +10,12 @@ import ChartCard from '../cards/chart_card';
 import SocialMediaSection from '../cards/social_media_section';
 import ChartistGraph from 'react-chartist';
 import  data  from '../../configs/data';
-// import  TagCloudCard from '../cards/word_cloud_card';
+import  TagCloudCard from '../cards/word_cloud_card';
 import Button from 'material-ui/Button';
 import random from 'lodash/random';
+import pullAt from 'lodash/pullAt';
+import filter from 'lodash/filter';
+import lodashmap from 'lodash/map';
 
 
 const barChartData = data.barChartData;
@@ -59,17 +62,31 @@ class DateView extends React.Component {
         'from_date': one_month_behind,
         'to_date': today,
         'news_all_line_chart_data': [],
-        'news_category_bar_chart_data': []
+        'news_category_bar_chart_data': [],
+        chipData: [
+          { key: 0, label: 'Health', selected: true },
+          { key: 1, label: 'Safety', selected: false },
+          { key: 2, label: 'Environment', selected: false },
+          { key: 3, label: 'Social Relations', selected: false },
+          { key: 4, label: 'Meaning in Life', selected: false },
+          { key: 5, label: 'Achievements', selected: false },
+          { key: 6, label: 'Economics', selected: false },
+          { key: 7, label: 'Politics', selected: false },
+
+        ],
+        'wordCloudData': []
       }
 
       this.histApiUrl = 'http://localhost:1234/cna_date_hist/';
       this.cnaCategoryApiUrl = 'http://localhost:1234/cna_date/';
+      this.wordCloudApiUrl = 'http://localhost:1234/cna_date_wordcloud/';
       this.categories = ['health', 'safety_security', 'environment',
                     'social_relations', 'meaning_in_life', 'achievement',
                     'economics', 'politics']
       this.setFromDate = this.setFromDate.bind(this);
       this.setToDate = this.setToDate.bind(this);
       this.fetchData = this.fetchData.bind(this);
+      this.onChipClick = this.onChipClick.bind(this);
   }
 
   componentDidMount() {
@@ -128,6 +145,12 @@ class DateView extends React.Component {
             <SocialMediaSection></SocialMediaSection>
           </Grid>
           <Grid item xs={12} sm={12} md={6}>
+            <TagCloudCard
+              chipData={this.state.chipData}
+              wordCloudData={this.state.wordCloudData}
+              onChipClick={this.onChipClick}
+            >
+            </TagCloudCard>
           </Grid>
         </Grid>
 
@@ -151,9 +174,9 @@ class DateView extends React.Component {
     })
   }
 
-
   fetchData(){
 
+    // query the line graph
     const histApiUrl = this.histApiUrl + this.state.from_date + '/' + this.state.to_date
     fetch(histApiUrl)
     .then(response => response.json())
@@ -166,6 +189,7 @@ class DateView extends React.Component {
       })
     })
 
+    // query the bar chart data for the bar graph
     var that = this;
     var categoryApiUrls = []
     this.categories.forEach(function(category) {
@@ -178,15 +202,12 @@ class DateView extends React.Component {
     Promise
     .all(categoryApiUrls)
     .then(all_data => {
-
       all_data.forEach(function(data) {
         num_articles_category.push(data['docs'].length)
       })
-
       num_articles_category.forEach(function(num) {
         num_social_media_category.push(random(0, 100))
       })
-
       this.setState({
         'news_category_bar_chart_data': {
           'labels': ['Health', 'Safety/Security', 'Environment',
@@ -195,9 +216,55 @@ class DateView extends React.Component {
           'series': [num_articles_category, num_social_media_category]
         }
       })
-
     })
 
+
+    // query the word cloud graph
+    var selected_chips = filter(this.state.chipData, {'selected': true});
+    var selected_indices = lodashmap(selected_chips, function(selected_chip){
+      return selected_chip['key']
+    })
+    var selected_classes = []
+    selected_indices.forEach(function(index){
+      selected_classes.push(that.categories[index])
+    })
+    const wordCloudApi = this.wordCloudApiUrl + this.state.from_date + '/' +
+    this.state.to_date + '/' + selected_classes;
+
+    fetch(wordCloudApi)
+    .then(response => response.json())
+    .then(function(wordCloudData){
+      that.setState({
+        'wordCloudData': wordCloudData['counts']
+      })
+    })
+
+  }
+
+
+  onChipClick(chipData){
+    const that = this;
+    var selected_chips = filter(this.state.chipData, {'selected': true});
+    var selected_indices = lodashmap(selected_chips, function(selected_chip){
+      return selected_chip['key']
+    })
+
+    var selected_classes = []
+    selected_indices.forEach(function(index){
+      selected_classes.push(that.categories[index])
+    })
+
+    const wordCloudApi = this.wordCloudApiUrl + this.state.from_date + '/' +
+    this.state.to_date + '/' + selected_classes;
+
+    fetch(wordCloudApi)
+    .then(response => response.json())
+    .then(function(wordCloudData){
+      that.setState({
+        'wordCloudData': wordCloudData['counts'],
+        'chipData': chipData
+      })
+    })
 
   }
 
