@@ -12,17 +12,15 @@ import ChartistGraph from 'react-chartist';
 import  data  from '../../configs/data';
 import  TagCloudCard from '../cards/word_cloud_card';
 import Button from 'material-ui/Button';
+import random from 'lodash/random';
 
 
-const barChartData = data.barChartData;
-const lineChartData = data.lineChartData;
 const lineChartOptions = data.lineChartOptions;
 
 
 class DateView extends React.Component {
 
   constructor(props){
-    console.log('inside the constructor')
       super(props);
       // Get the current date and pass it to the datepicker
       var today = new Date();
@@ -58,29 +56,23 @@ class DateView extends React.Component {
       this.state = {
         'from_date': one_month_behind,
         'to_date': today,
-        'news_all_line_chart_data': []
+        'news_all_line_chart_data': [],
+        'news_category_bar_chart_data': []
       }
 
       this.histApiUrl = 'http://localhost:1234/cna_date_hist/';
+      this.cnaCategoryApiUrl = 'http://localhost:1234/cna_date/';
+      this.categories = ['health', 'safety_security', 'environment',
+                    'social_relations', 'meaning_in_life', 'achievement',
+                    'economics', 'politics']
       this.setFromDate = this.setFromDate.bind(this);
       this.setToDate = this.setToDate.bind(this);
       this.fetchData = this.fetchData.bind(this);
   }
 
   componentDidMount() {
-    const histApiUrl = this.histApiUrl + this.state.from_date + '/' + this.state.to_date
-    fetch(histApiUrl)
-    .then(response => response.json())
-    .then((data) => {
-      this.setState({
-        'news_all_line_chart_data': {
-          series: [data['len_docs']],
-          labels: Array.from({length: data['len_docs'].length}, (x,i) => i)
-        }
-      })
-    })
+    this.fetchData()
   }
-
 
   render(){
     const { classes } = this.props
@@ -101,7 +93,7 @@ class DateView extends React.Component {
           <Grid item xs={12} sm={2} md={2}>
           <Button variant="raised" color="primary" size="large"
           className={classes.button} onClick={this.fetchData}>
-            Primary
+            Go
           </Button>
           </Grid>
         </Grid>
@@ -109,7 +101,8 @@ class DateView extends React.Component {
         <Grid container justify="center">
           <Grid item xs={12} sm={12} md={6}>
             <ChartCard
-              chart={<ChartistGraph data={barChartData} type={'Bar'} />}
+              chart={<ChartistGraph data={this.state.news_category_bar_chart_data}
+              type={'Bar'} />}
               chartContentHeader={"Traditional Media vs Social Media"}
               chartParagraphs={['Health has the highest News mentions',
             'Achievement has the highest Social Media Mentions']}
@@ -140,22 +133,17 @@ class DateView extends React.Component {
     )
   }
 
-
   setFromDate(date) {
-    console.log('setting from date to ', date)
     this.setState({
       'from_date': date
     })
   }
 
-
   setToDate(date) {
-    console.log('setting to date to', date);
     this.setState({
       'to_date': date
     })
   }
-
 
   fetchData(){
     const histApiUrl = this.histApiUrl + this.state.from_date + '/' + this.state.to_date
@@ -165,11 +153,45 @@ class DateView extends React.Component {
       this.setState({
         'news_all_line_chart_data': {
           series: [data['len_docs']],
-          labels: Array.from({length: data['len_docs'].length}, (x,i) => i)
+          labels: []
         }
       })
     })
+
+    var that = this;
+    var categoryApiUrls = []
+    this.categories.forEach(function(category) {
+        categoryApiUrls.push(fetch(that.cnaCategoryApiUrl + that.state.from_date +
+          '/' + that.state.to_date + '/' + category).then(response => response.json()))
+    })
+    var num_articles_category = []
+    var num_social_media_category = []
+
+    Promise
+    .all(categoryApiUrls)
+    .then(all_data => {
+
+      all_data.forEach(function(data) {
+        num_articles_category.push(data['docs'].length)
+      })
+
+      num_articles_category.forEach(function(num) {
+        num_social_media_category.push(random(0, 100))
+      })
+
+
+      this.setState({
+        'news_category_bar_chart_data': {
+          'labels': this.categories,
+          'series': [num_articles_category, num_social_media_category]
+        }
+      })
+
+    })
+
+
   }
+
 }
 
 DateView.propTypes = {

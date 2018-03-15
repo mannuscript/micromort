@@ -33,11 +33,13 @@ module.exports = function(server) {
     }
 
     // Query the database for the appropriate documents
+    from_date_object = new Date(from_date);
+    to_date_object = new Date(to_date)
 
     CategorizedNewsArticlesModel.find({
       'date': {
-          '$gte': new Date('2017-09-10'),
-          '$lt': new Date('2017-11-10')
+          '$gte': from_date_object,
+          '$lt': to_date_object
        }
     }, function(error, docs){
       res.send(docs)
@@ -75,10 +77,13 @@ module.exports = function(server) {
 
     // Query the database for the appropriate documents
 
+    from_date_object = new Date(from_date)
+    to_date_object = new Date(to_date)
+
     CategorizedNewsArticlesModel.find({
       'date': {
-          '$gte': new Date('2017-09-10'),
-          '$lt': new Date('2017-11-10')
+          '$gte': from_date_object,
+          '$lt': to_date_object
        },
        'risk_category': {
          '$in': [category]
