@@ -1,6 +1,7 @@
 *.logs
 *.pyc
 virtualenv/
+env/
 micromort/data/
 .idea
 micromort/outputs/fastext_risk_classification/logs
