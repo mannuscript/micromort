@@ -15,6 +15,33 @@ const landingComponentStyles = {
   }
 }
 class LandingComponent extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      'doughnutData': {
+        labels: [
+          'Social Media',
+          'Traditional Media',
+        ],
+        datasets: [{
+      		data: [],
+      		backgroundColor: [
+      		'#FF6384',
+      		'#36A2EB',
+      		],
+      		hoverBackgroundColor: [
+      		'#FF6384',
+      		'#36A2EB',
+      		]
+        }]
+      }
+    }
+
+    this.count_news_api_url = 'http://localhost:1234/num_cna'
+  }
+
+
   render() {
     const { classes } = this.props;
     return (
@@ -23,7 +50,7 @@ class LandingComponent extends React.Component {
 
             <Grid item xs={12} sm={12} md={12}>
               <ChartCard
-                chart={<Doughnut data={dougnutData}></Doughnut>}
+                chart={<Doughnut data={this.state.doughnutData}></Doughnut>}
                 chartContentHeader={"Proportion of Social Media and Traditional Media News"}
                 >
               </ChartCard>
@@ -52,6 +79,25 @@ class LandingComponent extends React.Component {
           </Grid>
       </div>
     )
+  }
+
+
+  componentDidMount(){
+    this.fetchData()
+  }
+
+
+  fetchData(){
+    const that = this;
+    fetch(this.count_news_api_url)
+    .then(response => response.json())
+    .then(function(count){
+      var doughnutData = {...that.state.doughnutData}
+      doughnutData.datasets[0]['data'] = [100, count['count']]
+      that.setState({
+        'doughnutData': doughnutData
+      })
+    })
   }
 }
 

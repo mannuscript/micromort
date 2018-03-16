@@ -169,8 +169,6 @@ module.exports = function(server) {
 
   })
 
-
-
   server.get('cna_date_wordcloud/:from_date/:to_date/:category',
   function(req, res, next){
     const from_date = req.params.from_date;
@@ -242,6 +240,16 @@ module.exports = function(server) {
         })
 
 
+    })
+
+  })
+
+
+  server.get('/num_cna', function(req, res, next){
+    CategorizedNewsArticlesModel.count({}, function(err, count) {
+      res.send({
+        count: count
+      })
     })
 
   })
