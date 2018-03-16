@@ -35,10 +35,28 @@ class LandingComponent extends React.Component {
       		'#36A2EB',
       		]
         }]
+      },
+      'barChartData':{
+        labels: ['Health', 'Safety', 'Environment', 'Social Relations', 'Meaning in Life', 'Achievement', 'Economics', 'Politics'],
+        datasets: [
+          {
+            label: '#Articles for different risk categories',
+            backgroundColor: ['#F44336','#E91E63', '#9C27B0', '#3F51B5', '#009688',
+          '#CDDC39', '#FF5722', 'blue'],
+            borderColor: ['#F44336','#E91E63', '#9C27B0', '#3F51B5', '#009688',
+          '#CDDC39', '#FF5722', 'blue'],
+            borderWidth: 1,
+            data: []
+          }
+        ]
       }
     }
 
-    this.count_news_api_url = 'http://localhost:1234/num_cna'
+    this.count_news_api_url = 'http://localhost:1234/num_cna';
+    this.count_categories_api_url = 'http://localhost:1234/num_cna/';
+    this.categories = ['health', 'safety_security', 'environment',
+                  'social_relations', 'meaning_in_life', 'achievement',
+                  'economics', 'politics'];
   }
 
 
@@ -70,7 +88,7 @@ class LandingComponent extends React.Component {
 
             <Grid item xs={12} sm={12} md={6}>
               <ChartCard
-                chart={<Bar data={data.chartjsBarChartData}></Bar>}
+                chart={<Bar data={this.state.barChartData}></Bar>}
                 chartContentHeader={"Volume of different risk categories in Traditional media"}
                 >
               </ChartCard>
@@ -98,6 +116,29 @@ class LandingComponent extends React.Component {
         'doughnutData': doughnutData
       })
     })
+
+    var categoryApiUrls = []
+    this.categories.forEach(function(category) {
+        categoryApiUrls.push(fetch(that.count_categories_api_url + '/' + category)
+        .then(response => response.json()))
+    })
+
+    var num_articles_category = []
+    Promise
+    .all(categoryApiUrls)
+    .then(all_data => {
+      all_data.forEach(function(data) {
+        num_articles_category.push(data['count'])
+      })
+
+      var barChartData = {...that.state.barChartData}
+      barChartData.datasets[0]['data'] = num_articles_category;
+      this.setState({
+        'barChartData': barChartData
+      })
+    })
+
+
   }
 }
 

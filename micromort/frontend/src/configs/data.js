@@ -58,16 +58,16 @@ var doughnutData = {
 }
 
 const chartjsBarChartData = {
-  labels: ['Health', 'Safety', 'Environment', 'Social Relations', 'Meaning in Life', 'Achievement', 'Economics'],
+  labels: ['Health', 'Safety', 'Environment', 'Social Relations', 'Meaning in Life', 'Achievement', 'Economics', 'Politics'],
   datasets: [
     {
       label: '#Articles for different risk categories',
       backgroundColor: ['#F44336','#E91E63', '#9C27B0', '#3F51B5', '#009688',
-    '#CDDC39', '#FF5722'],
+    '#CDDC39', '#FF5722', 'blue'],
       borderColor: ['#F44336','#E91E63', '#9C27B0', '#3F51B5', '#009688',
-    '#CDDC39', '#FF5722'],
+    '#CDDC39', '#FF5722', 'blue'],
       borderWidth: 1,
-      data: [65, 59, 80, 81, 56, 55, 100]
+      data: [65, 59, 80, 81, 56, 55, 100, 200]
     }
   ]
 };

@@ -253,4 +253,24 @@ module.exports = function(server) {
     })
 
   })
+
+  server.get('/num_cna/:category',
+  function(req, res, next){
+
+    const category = req.params.category
+    CategorizedNewsArticlesModel.count({
+       'risk_category': {
+         '$in': [category]
+       }
+    }, function(error, count){
+      res.send({
+        'count': count
+      })
+    })
+
+  })
+
+
+
+
 };
