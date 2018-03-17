@@ -42,9 +42,13 @@ class Pipeline:
         4. (TODO): Predict the classes of the news articles
     """
     def run(self, day):
+        logger.info("------------- Starting RSS feeder -----------")
         self.news_feed_crawler.start_crawling()
+        logger.info("------------- Getting URLS to work upon -----------")
         urls = self.getUrlsToCrawl(day)
+        logger.info("------------- Get number of shares/likes -----------")
         self.share_getter.main(urls)
+        logger.info("------------- Scrape and predict worry -----------")
         self.scraper.main(urls)
 
 

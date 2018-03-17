@@ -100,6 +100,11 @@ class Newspaper_scraper:
         urls = cursor.fetchall()
         return urls
 
+
+    """
+        Returns the array of json with article's details and predicted labels
+    """
+
     def main(self, urls, store=True):
 
         collection = ""
@@ -114,12 +119,13 @@ class Newspaper_scraper:
                 collection = self.channelnews_connection
             else:
                 collection = self.asiaone_connection
+            logger.log("scrapping :" + url)
             item = self.scrape(url)
-            data.append(item)
             if item != -1:
+                data.append(item)
                 if self.classify:
                     item["labels"] = self.classifier.predict_single(item["title"] + " " + item["text"], True)
-                #print("Storing in mongo:", item)
+                    logger.log("Predicted labels:" + str(item["labels"]))
                 if store:
                     self.storeInMongo(collection, item)
         return data
