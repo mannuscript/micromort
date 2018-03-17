@@ -4,13 +4,13 @@ from micromort.resources.configs.mongodbconfig import mongodb_config
 from micromort.data_stores.mysql import db, cursor
 from micromort.data_stores.mongodb import getConnection
 from micromort.utils.logger import logger
-
-
+from micromort.models.trained_models.svm_mean_embeddings import Classifier, MeanEmbeddingVectorizer
 
 class Newspaper_scraper:
-    def __init__(self):
+    def __init__(self, classify=False):
         self.db = db
         self.cursor = cursor
+        self.classify = classify
 
         asiaone_mongo_db = mongodb_config['dbs']['news_websites']['asiaone']['db']
         asiaone_mongo_collection =  mongodb_config['dbs']['news_websites']['asiaone']['collection']
@@ -36,6 +36,10 @@ class Newspaper_scraper:
         rss_mongo_collection =  mongodb_config['dbs']['rss']['collection']
         logger.debug("Creating mongo connection with db: " + rss_mongo_db + " collection: " + rss_mongo_collection)
         self.rss_connection = getConnection(rss_mongo_db, rss_mongo_collection)
+
+
+        if classify:
+            self.classifier = Classifier()
 
         pass
 
@@ -68,15 +72,14 @@ class Newspaper_scraper:
             "title" : article.title,
             "text" : article.text,
             "images" : article.images,
-            "summary" : rssData["summary"],
-            "published" : rssData["published"],
+            "summary" : rssData.get("summary", ""),
+            "published" : rssData.get("published", ""),
             "top_image" : article.top_image,
             "movies" :  article.movies,
             "meta": {
                 "updated_at" :  datetime.utcnow(),
             }
         }
-
         return ob
 
 
@@ -112,10 +115,13 @@ class Newspaper_scraper:
                 collection = self.asiaone_connection
             item = self.scrape(url)
             if item != -1:
+                if self.classify:
+                    item["labels"] = self.classifier.predict_single(item["title"] + " " + item["text"], True)
+                #print("Storing in mongo:", item)
                 self.storeInMongo(collection, item)
 
 
 if __name__ == "__main__":
-    ob = Newspaper_scraper()
+    ob = Newspaper_scraper(True)
     #print ob.getRssData("http://www.straitstimes.com/world/united-states/raccoon-sized-dinosaur-with-bandit-mask-amazes-scientists")
     ob.main(["http://www.straitstimes.com/world/united-states/raccoon-sized-dinosaur-with-bandit-mask-amazes-scientists"])

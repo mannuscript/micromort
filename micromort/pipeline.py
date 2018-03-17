@@ -13,7 +13,7 @@ class Pipeline:
         file_path = os.getcwd() + '/share_metrics/news-sites-rss-feed-links-sg.txt'
         self.news_feed_crawler = NewsFeedCrawler(file_path)
         self.share_getter = SharesGetter()
-        self.scraper = Newspaper_scraper()
+        self.scraper = Newspaper_scraper(True)
         self.mongoClient = getConnection("rss", "articles")
         pass
 
