@@ -93,9 +93,12 @@ class Newspaper_scraper:
         logger.debug("Article added to MongoDB database!")
 
     def getUrls(self):
+        fromDate = "2017-12-01"
+        toDate = "2018-03-01"
         self.cursor.execute(
                     #"""SELECT url FROM article_urls WHERE url like \"%www.asiaone.com%\" or url like \"%abc%\" """,
-                    """SELECT url FROM article_urls where url like "%businesstimes.com%" order by id desc""",
+                    """SELECT url FROM article_urls where created_at between %s and %s""",
+                    [fromDate, toDate]
                 )
         urls = cursor.fetchall()
         return urls
@@ -110,6 +113,7 @@ class Newspaper_scraper:
         collection = ""
         data = []
         for _url in urls:
+            #url = _url[0].strip()
             url = _url.strip()
             if "www.businesstimes.com.sg" in url:
                 collection = self.businesstimes_connection
@@ -119,13 +123,13 @@ class Newspaper_scraper:
                 collection = self.channelnews_connection
             else:
                 collection = self.asiaone_connection
-            logger.log("scrapping :" + url)
+            logger.info("scrapping :" + url)
             item = self.scrape(url)
             if item != -1:
                 data.append(item)
                 if self.classify:
                     item["labels"] = self.classifier.predict_single(item["title"] + " " + item["text"], True)
-                    logger.log("Predicted labels:" + str(item["labels"]))
+                    logger.info("Predicted labels:" + str(item["labels"]))
                 if store:
                     self.storeInMongo(collection, item)
         return data
@@ -133,5 +137,8 @@ class Newspaper_scraper:
 
 if __name__ == "__main__":
     ob = Newspaper_scraper(classify=True)
+    #urls = ob.getUrls()
+    #print "going to work on: " + str(len(urls)) + "urls"
+    #ob.main(urls)
     #print ob.getRssData("http://www.straitstimes.com/world/united-states/raccoon-sized-dinosaur-with-bandit-mask-amazes-scientists")
     ob.main(["http://www.straitstimes.com/world/united-states/raccoon-sized-dinosaur-with-bandit-mask-amazes-scientists"])
