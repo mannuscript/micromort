@@ -7,6 +7,7 @@ from micromort.share_metrics.newsfeedcrawler import NewsFeedCrawler
 from micromort.scrapers.newspaper_scraper import Newspaper_scraper
 from micromort.utils.logger import logger
 from micromort.data_stores.mongodb import getConnection
+from micromort.models.trained_models.svm_mean_embeddings import Classifier, MeanEmbeddingVectorizer
 
 class Pipeline:
     def __init__(self):

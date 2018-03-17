@@ -100,9 +100,10 @@ class Newspaper_scraper:
         urls = cursor.fetchall()
         return urls
 
-    def main(self,urls):
+    def main(self, urls, store=True):
 
         collection = ""
+        data = []
         for _url in urls:
             url = _url.strip()
             if "www.businesstimes.com.sg" in url:
@@ -114,14 +115,17 @@ class Newspaper_scraper:
             else:
                 collection = self.asiaone_connection
             item = self.scrape(url)
+            data.append(item)
             if item != -1:
                 if self.classify:
                     item["labels"] = self.classifier.predict_single(item["title"] + " " + item["text"], True)
                 #print("Storing in mongo:", item)
-                self.storeInMongo(collection, item)
+                if store:
+                    self.storeInMongo(collection, item)
+        return data
 
 
 if __name__ == "__main__":
-    ob = Newspaper_scraper(True)
+    ob = Newspaper_scraper(classify=True)
     #print ob.getRssData("http://www.straitstimes.com/world/united-states/raccoon-sized-dinosaur-with-bandit-mask-amazes-scientists")
     ob.main(["http://www.straitstimes.com/world/united-states/raccoon-sized-dinosaur-with-bandit-mask-amazes-scientists"])
