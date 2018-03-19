@@ -7,13 +7,14 @@ from micromort.share_metrics.newsfeedcrawler import NewsFeedCrawler
 from micromort.scrapers.newspaper_scraper import Newspaper_scraper
 from micromort.utils.logger import logger
 from micromort.data_stores.mongodb import getConnection
+from micromort.models.trained_models.svm_mean_embeddings import Classifier, MeanEmbeddingVectorizer
 
 class Pipeline:
     def __init__(self):
         file_path = os.getcwd() + '/share_metrics/news-sites-rss-feed-links-sg.txt'
         self.news_feed_crawler = NewsFeedCrawler(file_path)
         self.share_getter = SharesGetter()
-        self.scraper = Newspaper_scraper()
+        self.scraper = Newspaper_scraper(True)
         self.mongoClient = getConnection("rss", "articles")
         pass
 
@@ -41,9 +42,13 @@ class Pipeline:
         4. (TODO): Predict the classes of the news articles
     """
     def run(self, day):
+        logger.info("------------- Starting RSS feeder -----------")
         self.news_feed_crawler.start_crawling()
+        logger.info("------------- Getting URLS to work upon -----------")
         urls = self.getUrlsToCrawl(day)
+        logger.info("------------- Get number of shares/likes -----------")
         self.share_getter.main(urls)
+        logger.info("------------- Scrape and predict worry -----------")
         self.scraper.main(urls)
 
 
