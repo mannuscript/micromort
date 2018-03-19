@@ -21,28 +21,10 @@ mongodb_config = {
         "rss" : {
             "db" : "rss",
             "collection" : "articles"
-        }, 
-
+        },
         "news_websites"  : {
-            "asiaone" : {
-                "db" : "articles",
-                "collection" : "asiaone"
-            },
-
-            "channelnews" : {
-                "db" : "articles",
-                "collection" : "channelnews"
-            },
-
-            "businesstimes" : {
-                "db" : "articles",
-                "collection" : "businesstimes"
-            },
-
-            "straitstimes" : {
-                "db" : "articles",
-                "collection" : "straitstimes"
-            }
+            'db' : "micromort",
+            "collection" : "categorized_news"
            
 
         }

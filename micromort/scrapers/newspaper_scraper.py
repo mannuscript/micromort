@@ -12,25 +12,11 @@ class Newspaper_scraper:
         self.cursor = cursor
         self.classify = classify
 
-        asiaone_mongo_db = mongodb_config['dbs']['news_websites']['asiaone']['db']
-        asiaone_mongo_collection =  mongodb_config['dbs']['news_websites']['asiaone']['collection']
-        logger.debug("Creating mongo connection with db: " + asiaone_mongo_db + " collection: " + asiaone_mongo_collection)
-        self.asiaone_connection = getConnection(asiaone_mongo_db, asiaone_mongo_collection) 
+        mongo_db = mongodb_config['dbs']['news_websites']['db']
+        collection =  mongodb_config['dbs']['news_websites']['collection']
+        logger.debug("Creating mongo connection with db: " + mongo_db + " collection: " + collection)
+        self.mongo_connection = getConnection(mongo_db, collection)
 
-        businesstimes_mongo_db = mongodb_config['dbs']['news_websites']['businesstimes']['db']
-        businesstimes_mongo_collection =  mongodb_config['dbs']['news_websites']['businesstimes']['collection']
-        logger.debug("Creating mongo connection with db: " + businesstimes_mongo_db + " collection: " + businesstimes_mongo_collection)
-        self.businesstimes_connection = getConnection(businesstimes_mongo_db, businesstimes_mongo_collection) 
-
-        channelnews_mongo_db = mongodb_config['dbs']['news_websites']['channelnews']['db']
-        channelnews_mongo_collection =  mongodb_config['dbs']['news_websites']['channelnews']['collection']
-        logger.debug("Creating mongo connection with db: " + channelnews_mongo_db + " collection: " + channelnews_mongo_collection)
-        self.channelnews_connection = getConnection(channelnews_mongo_db, channelnews_mongo_collection) 
-
-        straitstimes_mongo_db = mongodb_config['dbs']['news_websites']['straitstimes']['db']
-        straitstimes_mongo_collection =  mongodb_config['dbs']['news_websites']['straitstimes']['collection']
-        logger.debug("Creating mongo connection with db: " + straitstimes_mongo_db + " collection: " + straitstimes_mongo_collection)
-        self.straitstimes_connection = getConnection(straitstimes_mongo_db, straitstimes_mongo_collection)
 
         rss_mongo_db = mongodb_config['dbs']['rss']['db']
         rss_mongo_collection =  mongodb_config['dbs']['rss']['collection']
@@ -66,14 +52,21 @@ class Newspaper_scraper:
 
         #Get Rss data from mongo (For summary and published date)
         rssData = self.getRssData(url)
-
+        summary = ""
+        published = ""
+        try:
+            summary = rssData.get("summary", "")
+            published = rssData.get("published", "")
+        except Exception:
+            summary = ""
+            published = ""
         ob = {
             "url" : url,
             "title" : article.title,
             "text" : article.text,
             "images" : article.images,
-            "summary" : rssData.get("summary", ""),
-            "published" : rssData.get("published", ""),
+            "summary" : summary,
+            "published" : published,
             "top_image" : article.top_image,
             "movies" :  article.movies,
             "meta": {
@@ -110,19 +103,11 @@ class Newspaper_scraper:
 
     def main(self, urls, store=True):
 
-        collection = ""
         data = []
         for _url in urls:
             #url = _url[0].strip()
             url = _url.strip()
-            if "www.businesstimes.com.sg" in url:
-                collection = self.businesstimes_connection
-            elif "www.straitstimes.com" in url:
-                collection = self.straitstimes_connection
-            elif "www.channelnewsasia.com" in url:
-                collection = self.channelnews_connection
-            else:
-                collection = self.asiaone_connection
+            
             logger.info("scrapping :" + url)
             item = self.scrape(url)
             if item != -1:
@@ -131,14 +116,17 @@ class Newspaper_scraper:
                     item["labels"] = self.classifier.predict_single(item["title"] + " " + item["text"], True)
                     logger.info("Predicted labels:" + str(item["labels"]))
                 if store:
-                    self.storeInMongo(collection, item)
+                    self.storeInMongo(self.mongo_connection, item)
         return data
 
 
 if __name__ == "__main__":
-    ob = Newspaper_scraper(classify=True)
+    ob = Newspaper_scraper(classify=False)
     #urls = ob.getUrls()
     #print "going to work on: " + str(len(urls)) + "urls"
     #ob.main(urls)
     #print ob.getRssData("http://www.straitstimes.com/world/united-states/raccoon-sized-dinosaur-with-bandit-mask-amazes-scientists")
-    ob.main(["http://www.straitstimes.com/world/united-states/raccoon-sized-dinosaur-with-bandit-mask-amazes-scientists"])
+    d = ob.main(["http://www.channelnewsasia.com/news/singapore/singapore-passport-becomes-most-powerful-in-the-world-9341920"],store=False)
+
+    for _ in d:
+        print _["url"], ",", _["title"]
