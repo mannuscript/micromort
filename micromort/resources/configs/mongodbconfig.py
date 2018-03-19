@@ -19,30 +19,12 @@ mongodb_config = {
             "hardwarezone":'hardwarezone'
         },
         "rss" : {
-            "db" : "rss",
-            "collection" : "articles"
-        }, 
-
+            "db" : "micromort",
+            "collection" : "rss"
+        },
         "news_websites"  : {
-            "asiaone" : {
-                "db" : "articles",
-                "collection" : "asiaone"
-            },
-
-            "channelnews" : {
-                "db" : "articles",
-                "collection" : "channelnews"
-            },
-
-            "businesstimes" : {
-                "db" : "articles",
-                "collection" : "businesstimes"
-            },
-
-            "straitstimes" : {
-                "db" : "articles",
-                "collection" : "straitstimes"
-            }
+            'db' : "micromort",
+            "collection" : "categorized_news"
            
 
         }
