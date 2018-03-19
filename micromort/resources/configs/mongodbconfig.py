@@ -19,8 +19,8 @@ mongodb_config = {
             "hardwarezone":'hardwarezone'
         },
         "rss" : {
-            "db" : "rss",
-            "collection" : "articles"
+            "db" : "micromort",
+            "collection" : "rss"
         },
         "news_websites"  : {
             'db' : "micromort",

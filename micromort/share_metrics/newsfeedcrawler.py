@@ -14,11 +14,14 @@ import sys
 
 from micromort.utils.logger import logger
 from micromort.data_stores.mongodb import getConnection
+from micromort.resources.configs.mongodbconfig import mongodb_config
 
 
 class NewsFeedCrawler:
     def __init__(self, feed_urls_file_name):
-        self.mongo_collection_articles = getConnection("rss", "articles")
+        mongo_db = mongodb_config['dbs']['rss']['db']
+        collection =  mongodb_config['dbs']['rss']['collection']
+        self.mongo_collection_articles = getConnection(mongo_db, collection)
         self.rss_feed_urls = []
         self._init_feed_urls(feed_urls_file_name)
         logger.info("Going to work on " + str(len(self.rss_feed_urls)) + " rss feeds")
