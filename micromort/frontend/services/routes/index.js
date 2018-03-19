@@ -13,6 +13,7 @@ const take = require('lodash/take');
 const englishStopWords =require('stopwords').english
 const filter = require('lodash/filter');
 const includes = require('lodash/includes');
+const flatten = require('lodash/flatten');
 
 module.exports = function(server) {
 
@@ -212,18 +213,12 @@ module.exports = function(server) {
          '$in': category
        }
     }, function(error, docs){
-        console.log('number of documents retrieved', docs.length)
-        var article_texts = lodashmap(docs, partialRight(pick, 'article_text'));
-        article_texts = lodashmap(article_texts, function(article_text){
-          return article_text['article_text']
+        words = []
+        docs.forEach(function(doc){
+          words.push(doc['article_words'])
         })
-        article_texts = join(article_texts, '');
-        words =  split(article_texts, ' ')
+        words = flatten(words)
 
-
-        // remove the stopwords
-        // it it taking a longgggggg time
-        // words = filter(words, function(word){ return includes(stopwords, word)})
 
         counts = countBy(words)
         counts = sortBy(toPairs(counts), function(tuple){return tuple[1]}).reverse();

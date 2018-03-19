@@ -111,7 +111,7 @@ class LandingComponent extends React.Component {
     .then(response => response.json())
     .then(function(count){
       var doughnutData = {...that.state.doughnutData}
-      doughnutData.datasets[0]['data'] = [20000, count['count']]
+      doughnutData.datasets[0]['data'] = [100, count['count']]
       that.setState({
         'doughnutData': doughnutData
       })

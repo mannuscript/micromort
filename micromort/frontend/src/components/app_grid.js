@@ -26,8 +26,6 @@ class AppGrid extends React.Component {
       <div>
         <Grid container>
             <Grid item md={2} >
-              <NavigationDrawer>
-              </NavigationDrawer>
             </Grid>
             <Grid item md={10}>
               <Switch>

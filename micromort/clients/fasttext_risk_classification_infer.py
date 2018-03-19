@@ -7,9 +7,14 @@ import copy
 from micromort.resources.configs.mongodbconfig import mongodb_config
 import pymongo
 import datetime
+from nltk import word_tokenize
+from nltk.corpus import stopwords
+import re
+
 
 if __name__ == '__main__':
     config_file = os.path.join('.', 'coarse_aspect_config.pkl')
+    stop_words = set(stopwords.words('english'))
 
     classifier = FastTextMultiLabelClassifier(config_file=config_file,
                                               load_model_from_file=True)
@@ -60,6 +65,14 @@ if __name__ == '__main__':
             date = doc['date']
             date = datetime.datetime.strptime(date, '%a %d %B %Y %H:%M:%S %z')
         data['date'] = date
+
+        # remove the stop words from text and store it in a field
+        article_text = data['article_text']
+        article_text = article_text.strip().replace("\n", "").lower()
+        article_text = re.sub('[^A-Za-z]+', ' ', article_text)
+        article_words = word_tokenize(article_text)
+        article_words = [word for word in article_words if word not in stop_words]
+        data['article_words'] = article_words
 
     collection.insert_many(annotated_data)
 

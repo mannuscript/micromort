@@ -10,7 +10,8 @@ const CategorizedNewsArticlesSchema  = new mongoose.Schema(
     article_id: Number,
     risk_category: [String],
     article_headline: String,
-    date: Date
+    date: Date,
+    article_words: [String]
   },
   {
     collection: 'risk_categorized_news'
