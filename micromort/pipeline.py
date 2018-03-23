@@ -7,6 +7,7 @@ from micromort.share_metrics.newsfeedcrawler import NewsFeedCrawler
 from micromort.scrapers.newspaper_scraper import Newspaper_scraper
 from micromort.utils.logger import logger
 from micromort.data_stores.mongodb import getConnection
+from micromort.resources.configs.mongodbconfig import mongodb_config
 from micromort.models.trained_models.svm_mean_embeddings import Classifier, MeanEmbeddingVectorizer
 
 class Pipeline:
@@ -15,7 +16,9 @@ class Pipeline:
         self.news_feed_crawler = NewsFeedCrawler(file_path)
         self.share_getter = SharesGetter()
         self.scraper = Newspaper_scraper(True)
-        self.mongoClient = getConnection("rss", "articles")
+        mongo_db = mongodb_config['dbs']['rss']['db']
+        collection =  mongodb_config['dbs']['rss']['collection']
+        self.mongoClient = getConnection(mongo_db, collection)
         pass
 
     def getUrlsToCrawl(self, d=1):
