@@ -23,9 +23,8 @@ class Pipeline:
 
     def getUrlsToCrawl(self, d=1):
         now = datetime.datetime.now()
-        today = datetime.datetime(now.year, now.month, now.day)
-        from_date = today + datetime.timedelta(days=-d)
-        to_date = today + datetime.timedelta(days=-d + 1)
+        from_date = now + datetime.timedelta(days=-d)
+        to_date = now + datetime.timedelta(days=-d + 1)
         from_id = ObjectId.from_datetime(from_date)
         to_id = ObjectId.from_datetime(to_date)
 
