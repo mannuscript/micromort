@@ -1,12 +1,12 @@
 # Micromort
 Project Micromort (Micro + Mortality) started at --- lab, NUS is the first attempt to detect the Risk from Social Media data. Think of it as doing next version of sentiment analysis in which we are trying to detect the risk pulse.
-This repo is the scriptpack for the project, containing most of the engineering work we are doing (which can be public also).
+This repo is the scriptpack for the project, containing most of the engineering work we are doing.
 
 #### Scripts:
 ------TODO
 1. Generate RSS feed
 2. Get social media shares/likes
-3. Scrappers
+3. Scrapers
 
 ### Prerequisites
 
