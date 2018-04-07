@@ -108,7 +108,9 @@ from mongodb import mongo_collection_articles
 ```
 
 ## TODO:
- 
+
+* Move out the code which can be public to a different repo.
+
 Scrape (One time) following websites:
 
 Forums:
