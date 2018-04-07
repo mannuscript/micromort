@@ -110,7 +110,7 @@ class SharesGetter:
                     + str(len(urls)) + " url(s)")
         logger.debug(" list of urls: " + str(urls))
 
-        url_chunks = batch(urls, 10)
+        url_chunks = batch(urls, 50)
 
         for url_chunk in url_chunks:
             # Get fb counts

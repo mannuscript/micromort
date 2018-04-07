@@ -2,7 +2,6 @@ import os
 import datetime
 from bson.objectid import ObjectId
 
-from micromort.share_metrics.shares_getter import SharesGetter
 from micromort.share_metrics.newsfeedcrawler import NewsFeedCrawler
 from micromort.scrapers.newspaper_scraper import Newspaper_scraper
 from micromort.utils.logger import logger
@@ -14,8 +13,6 @@ class Pipeline:
     def __init__(self):
         file_path = os.getcwd() + '/share_metrics/news-sites-rss-feed-links-sg.txt'
         self.news_feed_crawler = NewsFeedCrawler(file_path)
-        self.share_getter = SharesGetter()
-        self.scraper = Newspaper_scraper(True)
         mongo_db = mongodb_config['dbs']['rss']['db']
         collection =  mongodb_config['dbs']['rss']['collection']
         self.mongoClient = getConnection(mongo_db, collection)
@@ -29,10 +26,10 @@ class Pipeline:
         to_id = ObjectId.from_datetime(to_date)
 
         urls = []
-        logger.info("Getting urls from " + str(from_date) + " to " + str(to_date))
         articles = self.mongoClient.find({"_id": {"$gt": from_id, "$lt": to_id}})
         for article in articles:
             urls.append(article["link"])
+        logger.info("Fetched " + str(len(urls)) + " urls for date: " + str(from_date))
         return urls
 
 
@@ -43,15 +40,12 @@ class Pipeline:
         3. news_paper scarpper to get the news articles
         4. (TODO): Predict the classes of the news articles
     """
-    def run(self, day):
+    def run(self, day, classify=True):
         logger.info("------------- Starting RSS feeder -----------")
         self.news_feed_crawler.start_crawling()
-        logger.info("------------- Getting URLS to work upon -----------")
-        urls = self.getUrlsToCrawl(day)
-        logger.info("------------- Get number of shares/likes -----------")
-        self.share_getter.main(urls)
+        self.scraper = Newspaper_scraper(classify=classify)
         logger.info("------------- Scrape and predict worry -----------")
-        self.scraper.main(urls)
+        self.scraper.main(self.getUrlsToCrawl(day))
 
 
     

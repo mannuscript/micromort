@@ -11,7 +11,7 @@ This repo is the scriptpack for the project, containing most of the engineering 
 ### Prerequisites
 
  1. Mysql
-    1. Make sure you have mysql creds stored in ~/.my.cnf
+    1. Make sure you have mysql creds stored in /etc/mysql/my.cnf
  
  Sample file:
 ```
@@ -21,7 +21,6 @@ password=password
 ```
 
  2. Mongo DB running on localhost
- 3. Phantomjs
 
 
 
@@ -65,6 +64,13 @@ export PYTHONPATH="${PYTHONPATH}:/absolute/path/to/repo/micromort/"
  ``` 
 
  5. Crontab entries are in [crons file](./micromort/resources/crons)
+
+ 6. Creating the systemctl file for share getter.
+  ```
+    sudo vim /lib/systemd/system/share-getter.service
+    sudo systemctl start share-getter.service
+    sudo systemctl status share-getter.service
+  ```
 
 ### Running the scripts
 #### Scrapper: 

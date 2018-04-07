@@ -1,0 +1,8 @@
+[Unit]
+Description=Share getter service
+
+[Service]
+ExecStart=/home/onespace/micromort/micromort/shareGetterRunner.sh
+
+[Install]
+WantedBy=multi-user.target
