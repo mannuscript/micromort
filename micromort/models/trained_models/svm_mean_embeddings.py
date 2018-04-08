@@ -47,8 +47,7 @@ class MeanEmbeddingVectorizer(object):
 
 class Classifier:
     
-    def __init__(self):
-        base_path = "./resources/trained_models/oneVsAll_linear_SVM_mean_embeddings/"
+    def __init__(self, base_path = "./resources/trained_models/oneVsAll_linear_SVM_mean_embeddings/"):
         classifier_model = base_path + "svmWithEmbeddings.sav"
         mean_embedding_vectorizer_model = base_path + "mean_embedding_vectorizer.sav"
         mlb_model = base_path + "mlb"
