@@ -4,6 +4,7 @@ from micromort.resources.configs.mongodbconfig import mongodb_config
 from micromort.data_stores.mysql import db, cursor
 from micromort.data_stores.mongodb import getConnection
 from micromort.utils.logger import logger
+from dateutil import parser
 from micromort.models.trained_models.svm_mean_embeddings import Classifier, MeanEmbeddingVectorizer
 
 class Newspaper_scraper:
@@ -54,15 +55,17 @@ class Newspaper_scraper:
         rssData = self.getRssData(url)
         summary = ""
         published = ""
+        title = ""
         try:
             summary = rssData.get("summary", "")
-            published = rssData.get("published", "")
+            title = rssData.get("title", article.title)
+            published = parser.parse(rssData.get("published", ""))
         except Exception:
             summary = ""
             published = ""
         ob = {
             "url" : url,
-            "title" : article.title,
+            "title" : title,
             "text" : article.text,
             "images" : article.images,
             "summary" : summary,

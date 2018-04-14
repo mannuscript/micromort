@@ -166,7 +166,7 @@ class SharesGetter:
             # Sometimes the API returns 0 after few days... To prevent from updating incorrect value.
             effectedRows = self.cursor.execute(
                 """INSERT INTO article_social_media_shares(url_id, social_media_channel, counts)
-                values(%s, %s, %s) ON DUPLICATE KEY UPDATE counts=GREATEST(count,%s) """, [urlId, socialMediaChannel, count, count])
+                values(%s, %s, %s) ON DUPLICATE KEY UPDATE counts=GREATEST(counts,%s) """, [urlId, socialMediaChannel, count, count])
             
             if effectedRows and count != -1:
                 self.cursor.execute(
