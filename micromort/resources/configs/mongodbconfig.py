@@ -25,8 +25,10 @@ mongodb_config = {
         "news_websites"  : {
             'db' : "micromort",
             "collection" : "categorized_news"
-           
-
+        },
+        "news_tweets" : {
+            "db" : "micromort",
+            "collection" : "news_tweets"
         }
     },
     'onespace_host': '172.29.33.45'
