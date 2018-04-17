@@ -61,6 +61,7 @@ export PYTHONPATH="${PYTHONPATH}:/absolute/path/to/repo/micromort/"
  ```
  use sgtalk
  db.posts.createIndex( {"post.post_url" : 1 }, {"unique": true })
+ db.news_tweets.createIndex( {"id" : 1 }, {"unique": true })
  ``` 
 
  5. Crontab entries are in [crons file](./micromort/resources/crons)
