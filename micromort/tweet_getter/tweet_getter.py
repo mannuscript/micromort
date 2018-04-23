@@ -1,10 +1,15 @@
-#from micromort.pipeline import Pipeline
+from micromort.pipeline import Pipeline
 from micromort.utils.logger import logger
 from micromort.data_stores.mongodb import getConnection
 from micromort.resources.configs.twitter_getter_config import twitter_getter_config
 from micromort.resources.configs.mongodbconfig import mongodb_config
-
+import time
 from TwitterSearch import TwitterSearchOrder, TwitterSearchException, TwitterSearch
+
+def my_callback_closure(current_ts_instance): # accepts ONE argument: an instance of TwitterSearch
+        queries, tweets_seen = current_ts_instance.get_statistics()
+        if queries > 0 and (queries % 10) == 0: # trigger delay every 5th query
+            time.sleep(60) # sleep for 60 seconds
 
 class TweetGetter:
     def __init__(self):
@@ -34,15 +39,22 @@ class TweetGetter:
         since_id = self.get_since_id(url)
         tso = TwitterSearchOrder()
         tso.set_keywords([url])
-        print("setting id as ",  since_id)
         tso.set_since_id(since_id)
-        return list(self.ts.search_tweets_iterable(tso))
+        tweets = []
+        try:
+            tweets = self.ts.search_tweets_iterable(tso, callback=my_callback_closure)
+        except TwitterSearchException as e:
+            logger.error(e)
+            #logger.info(self.ts.get_statistics())
+            #logger.info(self.ts.get_metadata())
+        return list(tweets)
 
 
 
     def main(self, urls):
         for url in urls:
             tweets = self.get_tweets(url)
+            logger.info("Number of tweets for " + url + " are : " + str(len(tweets)))
             for tweet in tweets:
                 tweet["news_article_url"] = url
                 self.storeInMongo(tweet)
@@ -61,12 +73,12 @@ class TweetGetter:
 
 if __name__ == "__main__":
     logger.info("------------- Get number of shares/likes -----------")
-    #ob = Pipeline()
-    day = 1
+    ob = Pipeline()
+    day = 10
     tweet_getter = TweetGetter()
-
-    try:
-        for i in range(1, day+1):
-            tweet_getter.main(["http://www.foxnews.com/politics/2018/04/14/largest-syrian-american-group-hails-trump-after-military-action.html"])#ob.getUrlsToCrawl(i))
-    except Exception as ex:
-        logger.error(ex)
+    while(True):
+        try:
+            for i in range(1, day+1):
+                tweet_getter.main(ob.getUrlsToCrawl(i))
+        except Exception as ex:
+            logger.error(ex)
