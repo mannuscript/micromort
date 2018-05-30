@@ -144,7 +144,7 @@ class SharesGetter:
                 Now according to this fellow:
                 https://stackoverflow.com/questions/6291405/mysql-after-insert-ignore-get-primary-key
                 LAST_INSERT_ID would be zero for ignored case,
-                Bingo! just a select in such cases to get the url_id.
+                Bingo! just do a select in such cases to get the url_id.
 
                 then:
                 With socialMediachannel, counts, urlId: Do an "insert, on duplicate update" in 
