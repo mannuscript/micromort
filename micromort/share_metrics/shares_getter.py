@@ -1,14 +1,13 @@
 """
 Refer git meta data for creation details :)
 """
-
+import sys
 import requests
 import urllib
 import datetime
 import json
 from bson.objectid import ObjectId
 
-from micromort.data_stores.mongodb import getConnection
 from micromort.data_stores.mysql import db, cursor
 from micromort.utils.logger import logger
 from micromort.resources.configs.share_metricconfig import share_metricconfig
@@ -22,24 +21,8 @@ def batch(iterable, n=1):
 
 class SharesGetter:
     def __init__(self):
-        self.mongoClient = getConnection("rss", "articles")
         self.db = db
         self.cursor = cursor
-
-    def getUrlsToCrawl(self, d=1):
-        now = datetime.datetime.now()
-        today = datetime.datetime(now.year, now.month, now.day)
-        from_date = today + datetime.timedelta(days=-d)
-        to_date = today + datetime.timedelta(days=-d + 1)
-        from_id = ObjectId.from_datetime(from_date)
-        to_id = ObjectId.from_datetime(to_date)
-
-        urls = []
-        logger.info("Getting urls from ", from_date, " to ", to_date)
-        articles = self.mongoClient.find({"_id": {"$gt": from_id, "$lt": to_id}})
-        for article in articles:
-            urls.append(article["link"])
-        return urls
 
     @staticmethod
     def getFBData(urls):
@@ -67,7 +50,7 @@ class SharesGetter:
         api = share_metricconfig["linkedIn_share_api"].format(url)
         return requests.get(api)
 
-    def __get_fb_shares(self, urls):
+    def get_fb_shares(self, urls):
         res = self.getFBData(urls)
         if res and res.status_code == 200:
             try:
@@ -95,6 +78,7 @@ class SharesGetter:
                 logger.error("Failed to load count for url: " + url)
                 return -1
         else:
+            logger.error(res)
             return -1
 
     """
@@ -114,7 +98,7 @@ class SharesGetter:
 
         for url_chunk in url_chunks:
             # Get fb counts
-            fb_counts = self.__get_fb_shares(url_chunk)
+            fb_counts = self.get_fb_shares(url_chunk)
             for row in fb_counts:
                 url = row["url"]
                 countType = row["type"]
@@ -183,11 +167,33 @@ if __name__ == "__main__":
     #run them for last 30 days (including today)! 30 ? :O (This has to be stopped)
     #for i in range(0,30):
     #    ob.main(i)
-    ob.main(1)
+    from micromort.data_stores.mongodb import getConnection
+    mongo_db_name = "micromort"
+    mongo_collection_name = "newstweets_categorized_news"
+    mongoClient = getConnection(mongo_db_name, mongo_collection_name)
+    urls = []
+    count=0
+    for tweet in mongoClient.find():
+        urls.append(tweet["url"])
+        count= count+1
+        if count%1000 == 0:
+            fb_counts = ob.get_fb_shares(urls)
+            for row in fb_counts:
+                url = row["url"]
+                countType = row["type"]
+                count = row["count"]
+                storeInMongo(mongoClient, url, countType, count)
+            urls = []
+            print count
+            break    
+
+
+    #print urls
+    #ob.main(urls)
     #urls = ob.getUrlsToCrawl(1)
     #for url in urls:
     #    print url
-    #url = " http://www.straitstimes.com/tech/audio/beats-studio3-wireless-review-a-great-pair-of-headphones-for-ios-devices"
+    #url = "http://www.straitstimes.com/tech/audio/beats-studio3-wireless-review-a-great-pair-of-headphones-for-ios-devices"
     # counter = 0;
     # while(True):
     #     res = ob.getFBData("http://www.straitstimes.com/sport/football/football-vialli-says-england-struggle-to-handle-pressure")

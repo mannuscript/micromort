@@ -36,9 +36,8 @@ class Pipeline:
     """
         Run the pipeline:
         1. RSS feeder, to get the latest news articles.
-        2. shares_getter to get the likes/shares for urls for last one hour.
-        3. news_paper scarpper to get the news articles
-        4. (TODO): Predict the classes of the news articles
+        2. news_paper scarpper to get the news articles
+        3. Classify the classes of the news articles
     """
     def run(self, day, classify=True):
         logger.info("------------- Starting RSS feeder -----------")
