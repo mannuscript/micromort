@@ -3,9 +3,11 @@ from newspaper import Article
 from micromort.resources.configs.mongodbconfig import mongodb_config
 from micromort.data_stores.mysql import db, cursor
 from micromort.data_stores.mongodb import getConnection
+from multiprocessing.dummy import Pool as ThreadPool 
 from micromort.utils.logger import logger
 from dateutil import parser
-from micromort.models.trained_models.svm_mean_embeddings import Classifier, MeanEmbeddingVectorizer
+import sys
+import numpy as np
 
 class Newspaper_scraper:
     def __init__(self, classify=False):
@@ -14,7 +16,8 @@ class Newspaper_scraper:
         self.classify = classify
 
         mongo_db = mongodb_config['dbs']['news_websites']['db']
-        collection =  mongodb_config['dbs']['news_websites']['collection']
+        collection =  "newstweets_categorized_news"
+        #mongodb_config['dbs']['news_websites']['collection']
         logger.debug("Creating mongo connection with db: " + mongo_db + " collection: " + collection)
         self.mongo_connection = getConnection(mongo_db, collection)
 
@@ -26,6 +29,7 @@ class Newspaper_scraper:
 
 
         if classify:
+            from micromort.models.trained_models.svm_mean_embeddings import Classifier, MeanEmbeddingVectorizer
             self.classifier = Classifier()
 
         pass
@@ -34,7 +38,7 @@ class Newspaper_scraper:
         return self.rss_connection.find_one({"link" : url})
 
 
-    def scrape(self, url):
+    def scrape(self, url, useRssData=True):
         try:
             article = Article(url)
             article.download()
@@ -52,19 +56,24 @@ class Newspaper_scraper:
             return -1
 
         #Get Rss data from mongo (For summary and published date)
-        rssData = self.getRssData(url)
         summary = ""
         published = ""
-        title = ""
-        try:
-            summary = rssData.get("summary", "")
-            title = rssData.get("title", article.title)
-            published = parser.parse(rssData.get("published", ""))
-        except Exception:
-            summary = ""
-            published = ""
+        title = article.title
+        if useRssData:
+            rssData = self.getRssData(url)
+            try:
+                summary = rssData.get("summary", "")
+                title = rssData.get("title", article.title)
+                published = parser.parse(rssData.get("published", ""))
+            except Exception:
+                summary = ""
+                published = ""
+        
+        
+        
         ob = {
-            "url" : url,
+            "url" : article.url,
+            "original_url" : url,
             "title" : title,
             "text" : article.text,
             "images" : article.images,
@@ -80,7 +89,6 @@ class Newspaper_scraper:
 
 
     def storeInMongo(self,  collection,  item):
-    
         url = item["url"]
         collection.update({ 
             "url"  : url
@@ -101,35 +109,64 @@ class Newspaper_scraper:
 
 
     """
+        @urls : Array of urls to worked upon
+        @store : Boolean flag to decide if the scraped data to be stored in mongo
+        @useRssData : Boolean flag to decide if (summary, published_data and title)
+        is to be used from micromort.rss mongo collection. This should be set 
+        to true only for the urls for which RSS fed service is collecting the data
+        
         Returns the array of json with article's details and predicted labels
     """
 
-    def main(self, urls, store=True):
+    def main(self, urls, store=True, useRssData=False):
+        print "coming here"
+        try:
+            #data = []
+            count=0
+            for _url in urls:
+                #url = _url[0].strip()
+                url = _url.strip()[:1024]
+                count=count+1
+                if(count%10000 == 0):
+                    print "Done:::::::", count
+                logger.info("scrapping :" + url)
+                item = self.scrape(url, useRssData)
+                if item != -1:
+                    #data.append(item)
+                    if self.classify:
+                        item["labels"] = self.classifier.predict_single(item["title"] + " " + item["text"], True)
+                        logger.info("Predicted labels:" + str(item["labels"]))
+                    if store:
+                        self.storeInMongo(self.mongo_connection, item)
+        except Exception as e:
+            print e
+        return 1
 
-        data = []
-        for _url in urls:
-            #url = _url[0].strip()
-            url = _url.strip()
-            
-            logger.info("scrapping :" + url)
-            item = self.scrape(url)
-            if item != -1:
-                data.append(item)
-                if self.classify:
-                    item["labels"] = self.classifier.predict_single(item["title"] + " " + item["text"], True)
-                    logger.info("Predicted labels:" + str(item["labels"]))
-                if store:
-                    self.storeInMongo(self.mongo_connection, item)
-        return data
-
+def batch(iterable, n=1):
+    l = len(iterable)
+    for ndx in range(0, l, n):
+        yield iterable[ndx:min(ndx + n, l)]
 
 if __name__ == "__main__":
     ob = Newspaper_scraper(classify=False)
-    #urls = ob.getUrls()
-    #print "going to work on: " + str(len(urls)) + "urls"
-    #ob.main(urls)
-    #print ob.getRssData("http://www.straitstimes.com/world/united-states/raccoon-sized-dinosaur-with-bandit-mask-amazes-scientists")
-    d = ob.main(["http://www.channelnewsasia.com/news/singapore/singapore-passport-becomes-most-powerful-in-the-world-9341920"],store=False)
-
-    for _ in d:
-        print _["url"], ",", _["title"]
+    urls = []
+    file = sys.argv[1]
+    with open('/home/mannu/code/work/micromort/data/urls/' + file, 'r') as fp:
+        read_lines = fp.readlines()
+        for line in read_lines:
+            urls.append(line.strip())
+    ob.main(urls)
+    # batch_len = len(urls)
+    # n_threads = 10
+    # urls_batch = np.array_split(np.array(urls), n_threads)
+    # pool = ThreadPool(n_threads)
+    # #print "test", np.asarray(urls_batch)
+    # try:
+    #     print "coming here?"
+    #     results = pool.map(ob.main, np.asarray(urls_batch))
+    # except Exception as e:
+    #     print e
+    # #d = ob.main(urls, store=True, useRssData=False)
+    
+    # for _ in d:
+    #     print _["url"], ",", _["title"]
