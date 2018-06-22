@@ -167,32 +167,34 @@ if __name__ == "__main__":
     #run them for last 30 days (including today)! 30 ? :O (This has to be stopped)
     #for i in range(0,30):
     #    ob.main(i)
-    from micromort.data_stores.mongodb import getConnection
-    mongo_db_name = "micromort"
-    mongo_collection_name = "newstweets_categorized_news"
-    mongoClient = getConnection(mongo_db_name, mongo_collection_name)
-    urls = []
-    count=0
-    for tweet in mongoClient.find():
-        urls.append(tweet["url"])
-        count= count+1
-        if count%1000 == 0:
-            fb_counts = ob.get_fb_shares(urls)
-            for row in fb_counts:
-                url = row["url"]
-                countType = row["type"]
-                count = row["count"]
-                storeInMongo(mongoClient, url, countType, count)
-            urls = []
-            print count
-            break    
+    # from micromort.data_stores.mongodb import getConnection
+    # mongo_db_name = "micromort"
+    # mongo_collection_name = "newstweets_categorized_news"
+    # mongoClient = getConnection(mongo_db_name, mongo_collection_name)
+    # urls = []
+    # count=0
+    # for tweet in mongoClient.find():
+    #     urls.append(tweet["url"])
+    #     count= count+1
+    #     if count%1000 == 0:
+    #         fb_counts = ob.get_fb_shares(urls)
+    #         for row in fb_counts:
+    #             url = row["url"]
+    #             countType = row["type"]
+    #             count = row["count"]
+    #             storeInMongo(mongoClient, url, countType, count)
+    #         urls = []
+    #         print count
+    #         break    
 
-
+    print ob.get_fb_shares(["https://www.straitstimes.com/world/middle-east/iraqi-pm-declares-end-of-war-against-isis-in-iraq"])
     #print urls
     #ob.main(urls)
     #urls = ob.getUrlsToCrawl(1)
     #for url in urls:
     #    print url
+
+
     #url = "http://www.straitstimes.com/tech/audio/beats-studio3-wireless-review-a-great-pair-of-headphones-for-ios-devices"
     # counter = 0;
     # while(True):
