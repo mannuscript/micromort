@@ -533,6 +533,26 @@ def semeval_measures(predicted_labels, true_labels):
     return precision_score, recall_score, fmeasure
 
 
+def accuracy_multilabel(pred, ground_truth):
+    n = len(pred)
+    score = 0.0
+    for i in range(0,n):
+        d = {}
+        for label in pred[i]:
+            d[label] = 1
+        for label in ground_truth[i]:
+            if label in d:
+                d[label] = 2
+            else:
+                d[label] = 1
+        temp = 0
+        for ky in d.keys():
+            if d[ky] == 2:
+                temp = temp+1
+        score = score + float(temp)/len(d.keys())
+    return score/n
+
+
 if __name__ == "__main__":
     # true_labels = np.array([[0, 0, 0, 0]])
     # predicted_labels = np.array([[0, 0, 0, 0]])
