@@ -45,6 +45,32 @@ class MeanEmbeddingVectorizer(object):
         return self.transform(X)
 
 
+
+class PolarityClassifier:
+    def __init__(self, base_path = "./resources/trained_models/"):
+        classifier_model = base_path + "polarityModel.sav"
+        mean_embedding_vectorizer_model = base_path + "oneVsAll_linear_SVM_mean_embeddings/mean_embedding_vectorizer.sav"
+        mlb_model = base_path + "mlb"
+        self.classifier = pickle.load(open(classifier_model, 'rb'))
+        self.mean_embedding_vectorizer = joblib.load(mean_embedding_vectorizer_model)
+        self.mlb = pickle.load(open(mlb_model, 'rb'))
+    
+    def predict_single(self, article):
+        pred = self.mlb.inverse_transform(
+            self.classifier_model.predict(
+                self.mean_embedding_vectorizer.fit_transform([article])
+            )
+        )[0]
+        return list(pred)
+
+    def predict_all(self, articles):
+        result = []
+        for article in articles:
+            pred = self.predict_single(article)
+            result.append((article, pred))
+        return result
+
+
 class Classifier:
     
     def __init__(self, base_path = "./resources/trained_models/oneVsAll_linear_SVM_mean_embeddings/"):
@@ -92,4 +118,4 @@ if __name__ == "__main__":
     c = Classifier()
     news_article = "LONDON (NYTIMES) - The anonymous letters arrived this weekend in plain white envelopes with second-class stamps, and were sent to people in at least six communities in England.\n\nInside was a message so hateful that it sent ripples of alarm across the country and prompted a national counterterrorism investigation.\n\nThe message said April 3 would be \"Punish a Muslim Day\", and points would be awarded for acts of violence: 25 for pulling a woman's head scarf, 500 for murdering a Muslim and 1,000 for bombing a mosque.\n\nRiaz Ahmed, a Liberal Democrat councillor in Bradford, in West Yorkshire County, told The Mirror on Saturday that he had received one of the letters at his business address.\n\n\"It seems strange that anyone would send something like this to an address in a predominantly Muslim area,\" Ahmed was quoted as saying. \"When I opened it and saw the content, I was horrified.\"\n\nPeople in Birmingham, Cardiff, Leicester, London and Sheffield have also reported receiving the notes, according to the authorities, a member of Parliament and an organisation that monitors anti-Muslim activity.\n\nThe Metropolitan Police of London and other officials have warned Britons to be vigilant, and counterterrorism officials are investigating.\n\nNaz Shah, a member of Parliament from Bradford West, said on Twitter and in a Facebook post that members of her community had received the letters and that the situation had become \"very distressful, not only those who have received the letter but also for the wider communities\". Shah said the North East Counter Terrorism Unit, which is coordinating the investigation, had informed her that the letters appeared to be linked.\n\n\"I would appeal to the wider community to remain vigilant and report any suspicious activity to the police,\" she said.\n\nThe significance of April 3, 2018, was not immediately clear. Some neo-Nazi groups use the number 18 to signify the letters of Hitler's first and last names in the alphabet.\n\nTell Mama, an organisation that tracks anti-Muslim crimes, said in a Twitter post that the hate letters sent out in Britain numbered in the \"double figures\" and that it was working with the police.\n\nAt least some letters appeared to have been mailed out of Sheffield, the group said."
 
-    print(c.predict_single(news_article, True))
+    print(c.predict_single(news_article ))
